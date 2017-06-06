@@ -5,7 +5,7 @@ description: A toolkit to ease the use of the datastore with the googleapis pack
 homepage: https://github.com/skawa-universe/entify
 
 dependencies:
-  googleapis:
+  googleapis: ">=0.39.0 <0.40.0"
 
 dev_dependencies:
   test:
