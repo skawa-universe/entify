@@ -13,3 +13,7 @@ packages
 
 # Include when developing application packages.
 pubspec.lock
+
+# Win/Mac garbage
+.DS_Store
+Thumbs.db
