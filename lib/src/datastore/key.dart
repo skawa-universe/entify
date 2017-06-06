@@ -48,7 +48,7 @@ class Key implements ApiRepresentation<ds.Key> {
     if (parent == null)
       return [e];
     else
-      return _buildPath()..add(e);
+      return parent._buildPath()..add(e);
   }
 
   int get hashCode => combineHash(kind.hashCode,

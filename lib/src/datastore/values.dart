@@ -10,7 +10,7 @@ import "key.dart";
 /// `bool`, and the `null` value) `ByteBuffer`, `TypedData`,
 /// `Key` (including native API `Key`) and (possibly
 /// heterogeneous) lists of these kinds are supported.
-ds.Value toValue(Object obj, [bool excludeFromIndexes]) {
+ds.Value toValue(Object obj, {bool excludeFromIndexes}) {
   if (obj is ds.Value) return obj;
   ds.Value result = new ds.Value();
   result.excludeFromIndexes = excludeFromIndexes;
@@ -33,9 +33,10 @@ ds.Value toValue(Object obj, [bool excludeFromIndexes]) {
     return result..blobValueAsBytes = bytes;
   }
   if (obj is List) {
-    result.excludeFromIndexes = false;
-    List<ds.Value> values =
-        obj.map((e) => toValue(e, excludeFromIndexes)).toList(growable: false);
+    result.excludeFromIndexes = null;
+    List<ds.Value> values = obj
+        .map((e) => toValue(e, excludeFromIndexes: excludeFromIndexes))
+        .toList(growable: false);
     return result..arrayValue = (new ds.ArrayValue()..values = values);
   }
   if (obj is Key) return result..keyValue = obj.toApiObject();

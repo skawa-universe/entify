@@ -34,6 +34,7 @@ class PropertyOutlet {
 
   /// Set to the [Entity] object this outlet writes to.
   final Entity parent;
+
   /// Set to whether this [PropertyOutlet] sets the values as indexed
   /// (`true`) or as unindexed (`false`).
   final bool indexed;
@@ -72,8 +73,8 @@ class Entity implements ApiRepresentation<ds.Entity> {
     ..key = key.toApiObject()
     ..properties = new Map.fromIterable(
       _properties.keys,
-      value: (name) =>
-          toValue(_properties[name], _unindexedProperties.contains(name)),
+      value: (name) => toValue(_properties[name],
+          excludeFromIndexes: _unindexedProperties.contains(name)),
     );
 
   /// Returns the kind of this entity, or `null` if this entity has a `null` key
