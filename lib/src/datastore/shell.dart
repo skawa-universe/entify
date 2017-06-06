@@ -21,9 +21,9 @@ class DatastoreShell {
   /// [EntityNotFoundError] if the entity does not exist.
   Future<Entity> getSingle(Key key) {
     return getRaw([key]).then((ds.LookupResponse resp) {
-      if (resp.deferred?.length ?? 0 > 0)
+      if ((resp.deferred?.length ?? 0) > 0)
         throw new DatastoreShellError("Entity lookup deferred");
-      if (resp.missing?.length ?? 0 > 0) throw new EntityNotFoundError(key);
+      if ((resp.missing?.length ?? 0) > 0) throw new EntityNotFoundError(key);
       return new Entity.fromProtocol(resp.found[0].entity);
     });
   }
@@ -32,7 +32,7 @@ class DatastoreShell {
   /// all existing entities, but no entries for the non-existing ones.
   Future<Map<Key, Entity>> getAll(Iterable<Key> keys) {
     return getRaw(keys).then((ds.LookupResponse resp) {
-      if (resp.deferred?.length ?? 0 > 0)
+      if ((resp.deferred?.length ?? 0) > 0)
         throw new DatastoreShellError(
             "Entity lookup deferred: ${resp.deferred}");
       return new Map.fromIterable(
@@ -66,8 +66,7 @@ class QueryResultBatch {
       : endCursor = protocolResponse.batch.endCursor,
         entities = protocolResponse.batch.entityResults
                 ?.map((er) => new Entity.fromProtocol(er.entity))
-                ?.toList(growable: false) ??
-            null,
+                ?.toList(growable: false),
         isKeysOnly = protocolResponse.batch.entityResultType == "KEY_ONLY",
         isProjection = protocolResponse.batch.entityResultType == "PROJECTION",
         isFull = protocolResponse.batch.entityResultType == "FULL";
@@ -89,8 +88,7 @@ class QueryResultBatch {
 class PreparedQuery {
   PreparedQuery._fromProtocol(this.shell, this.query);
 
-  PreparedQuery._(this.shell, Query query)
-      : this.query = query.toApiObject();
+  PreparedQuery._(this.shell, Query query) : this.query = query.toApiObject();
 
   /// Runs the query and returns the resulting batch.
   Future<QueryResultBatch> runQuery() => runRawQuery().then(
