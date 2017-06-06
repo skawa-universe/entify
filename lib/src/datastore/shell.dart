@@ -66,7 +66,8 @@ class QueryResultBatch {
       : endCursor = protocolResponse.batch.endCursor,
         entities = protocolResponse.batch.entityResults
                 ?.map((er) => new Entity.fromProtocol(er.entity))
-                ?.toList(growable: false),
+                ?.toList(growable: false) ??
+            [],
         isKeysOnly = protocolResponse.batch.entityResultType == "KEY_ONLY",
         isProjection = protocolResponse.batch.entityResultType == "PROJECTION",
         isFull = protocolResponse.batch.entityResultType == "FULL";
