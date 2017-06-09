@@ -285,7 +285,10 @@ class Query implements ApiRepresentation<ds.Query> {
   List<Projection> projection;
 
   /// The maximum number of entities to return.
-  int limit;
+  ///
+  /// The default value is 1000. Set it to `null` to query all the
+  /// possible results.
+  int limit = 1000;
 
   /// The number of entities to skip before returning the results.
   int offset;
