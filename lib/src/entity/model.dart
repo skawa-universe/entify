@@ -8,29 +8,28 @@ import "../datastore/key.dart";
 import "../datastore/query.dart";
 
 /// Maps entity model objects of a certain type to [Entity] objects and back.
-/// 
+///
 /// The type parameter [T] must be the same class that is passed to the constructor
 /// (or pass the type to the default constructor as a generic type parameter).
 class EntityBridge<T> {
   /// Constructs an entity mapper object based on [type].
-  /// 
+  ///
   /// Uses an internal cache of [EntityBridge] objects.
   factory EntityBridge.fromClass(Type type) {
     EntityBridge<T> result = _cachedBridges[type];
-    if (result != null)
-      return result;
+    if (result != null) return result;
     result = new EntityBridge.uniqueFromClass(type);
     _cachedBridges[type] = result;
     return result;
   }
 
   /// Constructs a brand new and unique mapper based on [type].
-  /// 
+  ///
   /// Normally there's no need to use this constructor, the cached object
   /// should do every time.
   factory EntityBridge.uniqueFromClass(Type type) {
-    EntityMetadataBuilder builder = new EntityMetadataBuilder.fromClass(type);
-    return new EntityBridge._(builder.kind, builder.key, builder.propertyMetadata);
+    EntityMetadataBuilder b = new EntityMetadataBuilder.fromClass(type);
+    return new EntityBridge._(b.kind, b.key, b.propertyMetadata);
   }
 
   /// Constructs or returns a cached [EntityBridge] object based on
@@ -40,6 +39,9 @@ class EntityBridge<T> {
   }
 
   EntityBridge._(this.kind, this._key, this._propertyMetadata);
+
+  Key createKey({String name, int id, Key parent}) =>
+      new Key(kind, name: name, id: id, parent: parent);
 
   /// Converts an entity model object to an [Entity] object.
   Entity toEntity(T model) {
@@ -61,7 +63,8 @@ class EntityBridge<T> {
     }
 
     for (EntityPropertyBridge prop in _propertyMetadata.values)
-      result.setValue(prop.name, prop.accessor.getValue(im), indexed: prop.metadata.indexed);
+      result.setValue(prop.name, prop.accessor.getValue(im),
+          indexed: prop.metadata.indexed);
 
     return result;
   }
@@ -89,7 +92,8 @@ class EntityBridge<T> {
   /// Creates a new [Query] object on the kind represented by this [EntityBridge] object.
   Query query() => new Query(kind);
 
-  String toString() => "EntityBridge($kind, $_key, ${_propertyMetadata.values.join(", ")})";
+  String toString() =>
+      "EntityBridge($kind, $_key, ${_propertyMetadata.values.join(", ")})";
 
   /// The kind this [EntityBridge] instance represents.
   final String kind;

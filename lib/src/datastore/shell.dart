@@ -60,8 +60,23 @@ class DatastoreShell {
   final String project;
 }
 
+abstract class QueryResult<T> {
+  factory QueryResult(Iterable<T> entities, String endCursor) =>
+    new GenericQueryResult(entities, endCursor);
+
+  Iterable<T> get entities;
+  String get endCursor;
+}
+
+class GenericQueryResult<T> implements QueryResult<T> {
+  GenericQueryResult(this.entities, this.endCursor);
+
+  final Iterable<T> entities;
+  final String endCursor;
+}
+
 /// A bunch of entities returned from a query.
-class QueryResultBatch {
+class QueryResultBatch implements QueryResult<Entity> {
   QueryResultBatch(this.shell, ds.RunQueryResponse protocolResponse)
       : endCursor = protocolResponse.batch.endCursor,
         entities = protocolResponse.batch.entityResults
