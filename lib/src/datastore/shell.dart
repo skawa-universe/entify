@@ -24,7 +24,7 @@ class DatastoreShell {
       if ((resp.deferred?.length ?? 0) > 0)
         throw new DatastoreShellError("Entity lookup deferred");
       if ((resp.missing?.length ?? 0) > 0) throw new EntityNotFoundError(key);
-      return new Entity.fromProtocol(resp.found[0].entity);
+      return new Entity.fromApiObject(resp.found[0].entity);
     });
   }
 
@@ -36,7 +36,7 @@ class DatastoreShell {
         throw new DatastoreShellError(
             "Entity lookup deferred: ${resp.deferred}");
       return new Map.fromIterable(
-          resp.found.map((item) => new Entity.fromProtocol(item.entity)),
+          resp.found.map((item) => new Entity.fromApiObject(item.entity)),
           key: (e) => e.key);
     });
   }
@@ -80,7 +80,7 @@ class QueryResultBatch implements QueryResult<Entity> {
   QueryResultBatch(this.shell, ds.RunQueryResponse protocolResponse)
       : endCursor = protocolResponse.batch.endCursor,
         entities = protocolResponse.batch.entityResults
-                ?.map((er) => new Entity.fromProtocol(er.entity))
+                ?.map((er) => new Entity.fromApiObject(er.entity))
                 ?.toList(growable: false) ??
             [],
         isKeysOnly = protocolResponse.batch.entityResultType == "KEY_ONLY",

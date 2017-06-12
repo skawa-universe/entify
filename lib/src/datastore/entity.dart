@@ -3,6 +3,7 @@ import "package:googleapis/datastore/v1.dart" as ds;
 import "api_mapping.dart";
 import "values.dart";
 import "key.dart";
+import "errors.dart";
 
 /// A helper class to add indexed/unindexed properties to [Entity] objects using
 /// the `[]` operator.
@@ -59,11 +60,17 @@ class Entity implements ApiRepresentation<ds.Entity> {
   Entity.ofKind(String kind) : key = new Key(kind);
 
   /// Creates an entity from a `package:googleapis` object.
-  Entity.fromProtocol(ds.Entity entity)
-      : key = new Key.fromProtocol(entity.key) {
+  Entity.fromApiObject(ds.Entity entity)
+      : key = new Key.fromApiObject(entity.key) {
     Map<String, ds.Value> values = entity.properties;
     _properties.addAll(new Map.fromIterable(values.keys,
-        value: (name) => fromValue(values[name])));
+        value: (name) {
+          try {
+            return fromValue(values[name]);
+          } on DatastoreShellError catch (e) {
+            throw new DatastoreShellError("Field $name: ${e.message}");
+          }
+        }));
     _unindexedProperties
         .addAll(values.keys.where((name) => values[name].excludeFromIndexes));
   }

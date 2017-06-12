@@ -61,7 +61,10 @@ Object fromValue(ds.Value value) {
     return new Uint8List.fromList(value.blobValueAsBytes);
   if (value.arrayValue != null)
     return value.arrayValue.values.map(fromValue).toList();
-  if (value.keyValue != null) return new Key.fromProtocol(value.keyValue);
+  if (value.keyValue != null) return new Key.fromApiObject(value.keyValue);
 
-  throw new DatastoreShellError("Unknown value type: ${value}");
+  // Values representing empty arrays come as empty JSON objects
+  if (value.toJson().isEmpty) return null;
+
+  throw new DatastoreShellError("Unknown value type: ${value.toJson()}");
 }

@@ -18,7 +18,7 @@ class Key implements ApiRepresentation<ds.Key> {
   }
 
   /// Creates a key from the `package:googleapis` representation.
-  factory Key.fromProtocol(ds.Key key) {
+  factory Key.fromApiObject(ds.Key key) {
     Key lastKey = null;
     for (ds.PathElement element in key.path) {
       lastKey = new Key(element.kind,

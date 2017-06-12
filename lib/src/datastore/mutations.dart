@@ -119,7 +119,7 @@ class MutationBatchResponse {
       ++index;
       if (result.key != null) {
         if (_keys == null) _keys = new List.filled(_size, null);
-        _keys[index] = new Key.fromProtocol(result.key);
+        _keys[index] = new Key.fromApiObject(result.key);
       }
     });
   }
