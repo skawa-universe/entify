@@ -63,8 +63,10 @@ Object fromValue(ds.Value value) {
     return value.arrayValue.values.map(fromValue).toList();
   if (value.keyValue != null) return new Key.fromApiObject(value.keyValue);
 
-  // Values representing empty arrays come as empty JSON objects
-  if (value.toJson().isEmpty) return null;
+  // Nulls are represented in surprising ways
+  Map json = value.toJson();
+  if (json.isEmpty ||
+      json.length == 1 && json.containsKey("excludeFromIndexes")) return null;
 
   throw new DatastoreShellError("Unknown value type: ${value.toJson()}");
 }

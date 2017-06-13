@@ -63,16 +63,15 @@ class Entity implements ApiRepresentation<ds.Entity> {
   Entity.fromApiObject(ds.Entity entity)
       : key = new Key.fromApiObject(entity.key) {
     Map<String, ds.Value> values = entity.properties;
-    _properties.addAll(new Map.fromIterable(values.keys,
-        value: (name) {
-          try {
-            return fromValue(values[name]);
-          } on DatastoreShellError catch (e) {
-            throw new DatastoreShellError("Field $name: ${e.message}");
-          }
-        }));
-    _unindexedProperties
-        .addAll(values.keys.where((name) => values[name].excludeFromIndexes));
+    _properties.addAll(new Map.fromIterable(values.keys, value: (name) {
+      try {
+        return fromValue(values[name]);
+      } on DatastoreShellError catch (e) {
+        throw new DatastoreShellError("Field $name: ${e.message}");
+      }
+    }));
+    _unindexedProperties.addAll(
+        values.keys.where((name) => values[name].excludeFromIndexes ?? false));
   }
 
   /// Creates a `package:googleapis` object representation of this entity.
