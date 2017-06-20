@@ -11,8 +11,8 @@ class EntityPropertyBridge {
         this.name = name ?? accessor.name;
 
   String toString() => metadata.indexed
-    ? "${name} <=> ${accessor.name}"
-    : "${name} <=> unindexed(${accessor.name})";
+      ? "${name} <=> ${accessor.name}"
+      : "${name} <=> unindexed(${accessor.name})";
 
   /// The entity property name.
   final String name;
@@ -46,6 +46,10 @@ class EntityMetadataBuilder {
         current = current.superclass) {
       _process(current);
     }
+
+    if (key == null)
+      throw new EntityModelError(
+          "Type does not define a key: ${leaf.reflectedType}");
   }
 
   void _process(ClassMirror s) {
