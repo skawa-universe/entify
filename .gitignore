@@ -17,3 +17,10 @@ pubspec.lock
 # Win/Mac garbage
 .DS_Store
 Thumbs.db
+
+# This is an IDE agnostic project
+.idea
+*.iml
+.atom
+.vscode
+
