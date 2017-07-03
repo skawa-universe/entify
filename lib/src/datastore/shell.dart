@@ -36,7 +36,8 @@ class DatastoreShell {
         throw new DatastoreShellError(
             "Entity lookup deferred: ${resp.deferred}");
       return new Map.fromIterable(
-          resp.found.map((item) => new Entity.fromApiObject(item.entity)),
+          (resp.found ?? const [])
+              .map((item) => new Entity.fromApiObject(item.entity)),
           key: (e) => e.key);
     });
   }
@@ -62,7 +63,7 @@ class DatastoreShell {
 
 abstract class QueryResult<T> {
   factory QueryResult(Iterable<T> entities, String endCursor) =>
-    new GenericQueryResult(entities, endCursor);
+      new GenericQueryResult(entities, endCursor);
 
   Iterable<T> get entities;
   String get endCursor;
