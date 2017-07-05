@@ -60,7 +60,7 @@ Object fromValue(ds.Value value) {
   if (value.blobValue != null)
     return new Uint8List.fromList(value.blobValueAsBytes);
   if (value.arrayValue != null)
-    return value.arrayValue.values.map(fromValue).toList();
+    return value.arrayValue.values?.map(fromValue)?.toList();
   if (value.keyValue != null) return new Key.fromApiObject(value.keyValue);
 
   // Nulls are represented in surprising ways
