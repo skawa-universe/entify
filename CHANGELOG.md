@@ -1,3 +1,8 @@
+## 0.1.2+1
+
+* Handles `null` values in `fromValue` better
+* Throws error if the entity model class does not have a key
+
 ## 0.1.2
 
 * Renamed `fromProtocol` to `fromApiObject` in `Key` and `Entity` to follow
