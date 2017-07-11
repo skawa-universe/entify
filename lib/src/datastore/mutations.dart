@@ -115,8 +115,14 @@ class MutationBatchResponse {
   MutationBatchResponse(this.shell, ds.CommitResponse response)
       : _size = response.mutationResults.length {
     int index = -1;
+    _hasConflicts = false;
     response.mutationResults.forEach((ds.MutationResult result) {
       ++index;
+      if (result.conflictDetected ?? false) {
+        _hasConflicts = true;
+        if (_conflictDetected == null) _conflictDetected = new List.filled(_size, null);
+        _conflictDetected[index] = true;
+      }
       if (result.key != null) {
         if (_keys == null) _keys = new List.filled(_size, null);
         _keys[index] = new Key.fromApiObject(result.key);
@@ -134,7 +140,16 @@ class MutationBatchResponse {
     return _keys;
   }
 
+  List<bool> get conflictDetected {
+    if (_conflictDetected == null) _conflictDetected = new List.filled(_size, false);
+    return _conflictDetected;
+  }
+
+  bool get hasConflicts => _hasConflicts;
+
   List<Key> _keys;
+  List<bool> _conflictDetected;
+  bool _hasConflicts;
 
   final int _size;
 
