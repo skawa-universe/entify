@@ -27,7 +27,7 @@ class TestClass {
   @unindexed
   String get unbox => box.value;
 
-  void set unbox(String value) {
+  set unbox(String value) {
     box = new Box(value);
   }
 

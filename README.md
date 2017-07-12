@@ -40,7 +40,7 @@ class Species {
   @Persistent(name: "taxonomy")
   List<String> get taxonomyField => taxonomy.map((e) => e.toString()).toList();
 
-  void set taxonomyField(List<String> encodedTaxonomy) { /* ... */ }
+  set taxonomyField(List<String> encodedTaxonomy) { /* ... */ }
 
   // This field is converted to/from a property via a getter/setter respectively.
   List<Taxon> taxonomy = [];
@@ -50,7 +50,7 @@ class Species {
   List<String> get taxonomyPaths { /* ... */ }
 
   // But currently EntityBridge requires a setter
-  void set taxonomyPaths(List<String> doesntMatter) {}
+  set taxonomyPaths(List<String> doesntMatter) {}
 
   // This is a non-persistent property.
   String get fullTaxonomyPath => taxonomy.join('/');
