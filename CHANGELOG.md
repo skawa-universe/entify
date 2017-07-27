@@ -1,3 +1,7 @@
+## 0.1.2+2
+
+* Setters are optional for properties in entity model classes
+
 ## 0.1.2+1
 
 * Handles `null` values in `fromValue` better
