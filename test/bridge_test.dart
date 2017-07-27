@@ -35,6 +35,9 @@ class TestClass {
 
   @unindexed
   Uint8List bytes;
+
+  @persistent
+  String get generatedField => name.toUpperCase();
 }
 
 main() {
@@ -57,6 +60,7 @@ main() {
     expect(e.unindexed["renamed"], "Nowhere");
     expect(e.unindexed["unbox"], "bar");
     expect(e.unindexed["bytes"], equals(bytesAsList));
+    expect(e.indexed["generatedField"], equals("FOO"));
   });
 
   test("Basic deserialization", () {
@@ -69,6 +73,7 @@ main() {
     e.unindexed["renamed"] = "Somewhere";
     e.unindexed["unbox"] = "pub";
     e.unindexed["bytes"] = new Uint8List.fromList(bytesAsList);
+    e.indexed["generatedField"] = "RNZAF";
     TestClass tc = new TestClass();
     tcb.fromEntity(e, tc);
 

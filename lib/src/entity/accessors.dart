@@ -54,10 +54,9 @@ class MethodPropertyAccessor implements PropertyAccessor {
   /// The parameters can be provided in any order the constructor detects
   /// which one is which.
   MethodPropertyAccessor(
-      MethodMirror getterOrSetter, MethodMirror setterOrGetter)
+      MethodMirror getterOrSetter, [MethodMirror setterOrGetter])
       : _getter = getterOrSetter.isGetter ? getterOrSetter : setterOrGetter,
         _setter = getterOrSetter.isSetter ? getterOrSetter : setterOrGetter {
-    if (!_setter.isSetter) throw new EntityModelError("No setter was given");
     if (!_getter.isGetter) throw new EntityModelError("No getter was given");
   }
 
@@ -66,16 +65,19 @@ class MethodPropertyAccessor implements PropertyAccessor {
 
   @override
   bool acceptsType(Type type) =>
-      reflectType(type).isAssignableTo(_setter.parameters[0].type);
+      reflectType(type).isAssignableTo(_typeMirror);
 
   @override
   void setValue(InstanceMirror object, dynamic value) {
-    object.setField(_getter.simpleName, value);
+    if (_setter != null) object.setField(_getter.simpleName, value);
   }
 
   @override
   dynamic getValue(InstanceMirror object) =>
       object.getField(_getter.simpleName).reflectee;
+
+  TypeMirror get _typeMirror =>
+      _setter != null ? _setter.parameters[0].type : _getter.returnType;
 
   final MethodMirror _setter;
   final MethodMirror _getter;

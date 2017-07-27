@@ -68,7 +68,7 @@ class EntityMetadataBuilder {
         if (mm.isStatic || !mm.isGetter) continue;
         String setterName = "${MirrorSystem.getName(mm.simpleName)}=";
         MethodMirror setter = decls[new Symbol(setterName)];
-        if (setter == null) continue;
+        // setter may be null, but that's OK
         accessor = new MethodPropertyAccessor(mm, setter);
       }
 
