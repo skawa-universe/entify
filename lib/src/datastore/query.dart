@@ -5,7 +5,13 @@ import "values.dart";
 import "api_mapping.dart";
 
 /// Every class that can be used as a filter implements this interface.
-abstract class Filter extends ApiRepresentation<ds.Filter> {}
+abstract class Filter extends ApiRepresentation<ds.Filter> {
+  static and(List<FilterPredicate> predicates) {
+    if (predicates == null || predicates.isEmpty) return null;
+    if (predicates.length == 1) return predicates[0];
+    return new CompoundFilter.and(predicates);
+  }
+}
 
 /// Every class that can be used as a filter predicate implements this interface.
 abstract class FilterPredicate extends Filter {}
