@@ -69,7 +69,7 @@ class DatastoreShell {
     if (transactionId == null) {
       lr.readOptions.readConsistency = "EVENTUAL";
     } else {
-      lr.readOptions.readConsistency = "STRONG";
+      lr.readOptions.readConsistency = null;
       lr.readOptions.transaction = transactionId;
     }
     return api.projects.lookup(lr, project);
@@ -151,7 +151,7 @@ class PreparedQuery {
     qr.readOptions = new ds.ReadOptions();
     if (shell.isTransactional) {
       qr.readOptions
-        ..readConsistency = "STRONG"
+        ..readConsistency = null
         ..transaction = shell.transactionId;
     } else {
       qr.readOptions..readConsistency = "EVENTUAL";

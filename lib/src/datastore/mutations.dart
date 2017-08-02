@@ -3,6 +3,7 @@ import "package:googleapis/datastore/v1.dart" as ds;
 
 import "shell.dart";
 import "entity.dart";
+import "errors.dart";
 import "key.dart";
 
 /// Represents a set of mutations that can be submitted with a commit call
@@ -92,11 +93,24 @@ class MutationBatch {
 
   /// Commits all the mutations.
   ///
-  /// Throws [ConcurrentModificationError] if the transaction has failed.
-  Future<MutationBatchResponse> commit() => commitRaw().then((ds.CommitResponse resp) {
-        if (resp.mutationResults.any((ds.MutationResult result) => result.conflictDetected))
-          throw new ConcurrentModificationError();
-        return new MutationBatchResponse(shell, resp);
+  /// Throws [ConcurrentModificationError] if the transaction has failed (unless it is
+  /// transactional this may mean that some mutations have succeeded).
+  Future<MutationBatchResponse> commit() =>
+      commitRaw().then((ds.CommitResponse resp) => new MutationBatchResponse(shell, resp), onError: (error) {
+        if (error is ds.DetailedApiRequestError) {
+          if (error.status == 400 || error.status == 409) {
+            throw new DatastoreConflictError(
+                error.status == 400
+                    ? "An insert/update mutation could not be completed"
+                    : "The transaction ran into a conflict",
+                error);
+          } else if (error.status == 500) {
+            throw new DatastoreTransientError(error.message ?? "A transient error has occured", error);
+          } else {
+            throw new UnknownDatastoreError(error.message, error);
+          }
+        }
+        throw error;
       });
 
   @deprecated
