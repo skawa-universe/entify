@@ -14,7 +14,10 @@ class DatastoreShell {
   factory DatastoreShell(ds.DatastoreApi api, String project) =>
       new DatastoreShell._(api, project, transactionId: null, rootShell: null);
 
-  DatastoreShell._(this.api, this.project, {this.transactionId, DatastoreShell rootShell}) : _rootShell = rootShell;
+  DatastoreShell._(this.api, this.project, {String transactionId, DatastoreShell rootShell})
+      : this._rootShell = rootShell,
+        this.transactionId = transactionId,
+        _activeTransaction = transactionId != null;
 
   /// Returns a [DatastoreShell] instance that runs every operation in the
   /// newly created transaction.
@@ -32,6 +35,7 @@ class DatastoreShell {
     if (!isTransactional) throw new DatastoreShellError("No active transaction");
     ds.RollbackRequest request = new ds.RollbackRequest();
     request.transaction = transactionId;
+    _activeTransaction = false;
     return api.projects.rollback(request, project).then((ds.RollbackResponse response) => null);
   }
 
@@ -75,8 +79,46 @@ class DatastoreShell {
     return api.projects.lookup(lr, project);
   }
 
+  Future<T> runTransaction<T>(Future<T> transactionBody(DatastoreShell transactionShell),
+      {int retryCount: 16,
+      Duration firstRetryDuration: const Duration(milliseconds: 10),
+      bool delayOnConflict: false,
+      bool backDownOnConflict: false,
+      Duration stepDownRetryDuration(Duration previousDuration): defaultExponentialStepDown,
+      void errorCallback(WrappedServerError error)}) async {
+    WrappedServerError lastError;
+    Duration nextRetryDuration = firstRetryDuration;
+    while (retryCount > 0) {
+      --retryCount;
+      DatastoreShell transactional = await beginTransaction();
+      try {
+        return await transactionBody(transactional);
+      } on DatastoreConflictError catch (e) {
+        lastError = e;
+        if (errorCallback != null) errorCallback(e);
+        if (delayOnConflict) {
+          await new Future.delayed(nextRetryDuration, () => null);
+          if (backDownOnConflict) nextRetryDuration = stepDownRetryDuration(nextRetryDuration);
+        }
+      } on DatastoreTransientError catch (e) {
+        lastError = e;
+        if (errorCallback != null) errorCallback(e);
+        await new Future.delayed(nextRetryDuration, () => null);
+        nextRetryDuration = stepDownRetryDuration(nextRetryDuration);
+      } finally {
+        if (transactional._activeTransaction) await transactional.rollback();
+      }
+    }
+    throw lastError;
+  }
+
+  static Duration defaultExponentialStepDown(Duration previousDuration) {
+    if (previousDuration.compareTo(const Duration(seconds: 10)) >= 0) return previousDuration;
+    return previousDuration * 2;
+  }
+
   /// Starts a mutation batch.
-  MutationBatch beginMutation() => new MutationBatch(this);
+  MutationBatch beginMutation() => new MutationBatch(this, onCommit: (_) => _activeTransaction = false);
 
   /// The underlying API object.
   final ds.DatastoreApi api;
@@ -90,6 +132,8 @@ class DatastoreShell {
   bool get isTransactional => transactionId != null;
 
   final DatastoreShell _rootShell;
+
+  bool _activeTransaction;
 
   /// The non-transactional shell instance.
   DatastoreShell get nonTransactionalShell => _rootShell ?? (transactionId == null ? this : null);

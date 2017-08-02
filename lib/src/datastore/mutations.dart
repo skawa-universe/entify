@@ -6,10 +6,12 @@ import "entity.dart";
 import "errors.dart";
 import "key.dart";
 
+typedef void CommitCallback(MutationBatch batch);
+
 /// Represents a set of mutations that can be submitted with a commit call
 /// (either transactionally or nontransactionally).
 class MutationBatch {
-  MutationBatch(this.shell);
+  MutationBatch(this.shell, {CommitCallback onCommit}): _commitCallback = onCommit;
 
   /// Adds an `insert` mutation to this batch.
   ///
@@ -130,6 +132,7 @@ class MutationBatch {
   Future<ds.CommitResponse> commitRaw() {
     DatastoreShell shell = this.shell;
     ds.CommitRequest req = createRequest();
+    if (_commitCallback != null) _commitCallback(this);
     return shell.api.projects.commit(req, shell.project);
   }
 
@@ -141,6 +144,7 @@ class MutationBatch {
 
   /// The [DatastoreShell] object this mutation batch object belongs to.
   final DatastoreShell shell;
+  final CommitCallback _commitCallback;
 }
 
 /// The result of a mutation is an array of keys which are set to either the generated keys
