@@ -11,18 +11,41 @@ import "mutations.dart";
 /// Provides a useful interface over the `package:googleapis` `DatastoreApi` object.
 class DatastoreShell {
   /// Constructs the shell using the given [api] object and [project] identifier.
-  DatastoreShell(this.api, this.project);
+  factory DatastoreShell(ds.DatastoreApi api, String project) =>
+      new DatastoreShell._(api, project, transactionId: null, rootShell: null);
+
+  DatastoreShell._(this.api, this.project, {this.transactionId, DatastoreShell rootShell}) : _rootShell = rootShell;
+
+  /// Returns a [DatastoreShell] instance that runs every operation in the
+  /// newly created transaction.
+  ///
+  /// The transaction can be committed by running a (possibly empty) mutation
+  Future<DatastoreShell> beginTransaction() {
+    ds.BeginTransactionRequest request = new ds.BeginTransactionRequest();
+    return api.projects.beginTransaction(request, project).then((ds.BeginTransactionResponse response) {
+      if (response.transaction == null) throw new DatastoreShellError("Expected a transaction");
+      return new DatastoreShell._(api, project, transactionId: response.transaction, rootShell: nonTransactionalShell);
+    });
+  }
+
+  Future<Null> rollback() {
+    if (!isTransactional) throw new DatastoreShellError("No active transaction");
+    ds.RollbackRequest request = new ds.RollbackRequest();
+    request.transaction = transactionId;
+    return api.projects.rollback(request, project).then((ds.RollbackResponse response) => null);
+  }
 
   /// Prepares a query. Currently it's not much more than a simple wrapper, later
   /// it may emulate running multiple queries at once and merging their responses.
+  ///
+  /// Only ancestor queries can be run in a transaction.
   PreparedQuery prepareQuery(Query query) => new PreparedQuery._(this, query);
 
   /// Retrieves a single entity by key. Throws (asynchronously)
   /// [EntityNotFoundError] if the entity does not exist.
   Future<Entity> getSingle(Key key) {
     return getRaw([key]).then((ds.LookupResponse resp) {
-      if ((resp.deferred?.length ?? 0) > 0)
-        throw new DatastoreShellError("Entity lookup deferred");
+      if ((resp.deferred?.length ?? 0) > 0) throw new DatastoreShellError("Entity lookup deferred");
       if ((resp.missing?.length ?? 0) > 0) throw new EntityNotFoundError(key);
       return new Entity.fromApiObject(resp.found[0].entity);
     });
@@ -32,12 +55,8 @@ class DatastoreShell {
   /// all existing entities, but no entries for the non-existing ones.
   Future<Map<Key, Entity>> getAll(Iterable<Key> keys) {
     return getRaw(keys).then((ds.LookupResponse resp) {
-      if ((resp.deferred?.length ?? 0) > 0)
-        throw new DatastoreShellError(
-            "Entity lookup deferred: ${resp.deferred}");
-      return new Map.fromIterable(
-          (resp.found ?? const [])
-              .map((item) => new Entity.fromApiObject(item.entity)),
+      if ((resp.deferred?.length ?? 0) > 0) throw new DatastoreShellError("Entity lookup deferred: ${resp.deferred}");
+      return new Map.fromIterable((resp.found ?? const []).map((item) => new Entity.fromApiObject(item.entity)),
           key: (e) => e.key);
     });
   }
@@ -47,7 +66,12 @@ class DatastoreShell {
     ds.LookupRequest lr = new ds.LookupRequest();
     lr.keys = keys.map(ApiRepresentation.mapToApi).toList(growable: false);
     lr.readOptions = new ds.ReadOptions();
-    lr.readOptions.readConsistency = "EVENTUAL";
+    if (transactionId == null) {
+      lr.readOptions.readConsistency = "EVENTUAL";
+    } else {
+      lr.readOptions.readConsistency = "STRONG";
+      lr.readOptions.transaction = transactionId;
+    }
     return api.projects.lookup(lr, project);
   }
 
@@ -59,11 +83,20 @@ class DatastoreShell {
 
   /// The project identifier.
   final String project;
+
+  /// The transaction id this instance uses for all operations.
+  final String transactionId;
+
+  bool get isTransactional => transactionId != null;
+
+  final DatastoreShell _rootShell;
+
+  /// The non-transactional shell instance.
+  DatastoreShell get nonTransactionalShell => _rootShell ?? (transactionId == null ? this : null);
 }
 
 abstract class QueryResult<T> {
-  factory QueryResult(Iterable<T> entities, String endCursor) =>
-      new GenericQueryResult(entities, endCursor);
+  factory QueryResult(Iterable<T> entities, String endCursor) => new GenericQueryResult(entities, endCursor);
 
   Iterable<T> get entities;
   String get endCursor;
@@ -108,15 +141,21 @@ class PreparedQuery {
   PreparedQuery._(this.shell, Query query) : this.query = query.toApiObject();
 
   /// Runs the query and returns the resulting batch.
-  Future<QueryResultBatch> runQuery() => runRawQuery().then(
-      (ds.RunQueryResponse response) => new QueryResultBatch(shell, response));
+  Future<QueryResultBatch> runQuery() =>
+      runRawQuery().then((ds.RunQueryResponse response) => new QueryResultBatch(shell, response));
 
   /// Runs the query and returns the raw API response.
   Future<ds.RunQueryResponse> runRawQuery() {
     ds.RunQueryRequest qr = new ds.RunQueryRequest();
     qr.query = query;
     qr.readOptions = new ds.ReadOptions();
-    qr.readOptions..readConsistency = "EVENTUAL";
+    if (shell.isTransactional) {
+      qr.readOptions
+        ..readConsistency = "STRONG"
+        ..transaction = shell.transactionId;
+    } else {
+      qr.readOptions..readConsistency = "EVENTUAL";
+    }
     return shell.api.projects.runQuery(qr, shell.project);
   }
 

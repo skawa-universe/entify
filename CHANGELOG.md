@@ -1,3 +1,9 @@
+## 0.2.0
+
+* Added support for transactions.
+* Renamed `MutationBatch.execute` and `executeRaw` to `commit`.
+  The `execute` methods are deprecated now and will be removed in a future release.
+
 ## 0.1.2+2
 
 * Setters are optional for properties in entity model classes
