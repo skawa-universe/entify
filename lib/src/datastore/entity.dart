@@ -121,6 +121,12 @@ class Entity implements ApiRepresentation<ds.Entity> {
     _unindexedProperties.clear();
   }
 
+  void setPropertiesFrom(Entity other) {
+    _unindexedProperties.removeAll(other._properties.keys);
+    _unindexedProperties.addAll(other._unindexedProperties);
+    _properties.addAll(other._properties);
+  }
+
   /// Returns a property value.
   Object operator [](String name) => _properties[name];
 
