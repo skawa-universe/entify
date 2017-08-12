@@ -150,10 +150,10 @@ class MutationBatch {
 /// The result of a mutation is an array of keys which are set to either the generated keys
 /// or to `null` if no key generation was necessary.
 class MutationBatchResponse {
-  MutationBatchResponse(this.shell, ds.CommitResponse response) : _size = response.mutationResults.length {
+  MutationBatchResponse(this.shell, ds.CommitResponse response) : _size = response.mutationResults?.length ?? 0 {
     int index = -1;
     _hasConflicts = false;
-    response.mutationResults.forEach((ds.MutationResult result) {
+    response.mutationResults?.forEach((ds.MutationResult result) {
       ++index;
       if (result.conflictDetected ?? false) {
         _hasConflicts = true;
