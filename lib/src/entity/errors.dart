@@ -5,5 +5,8 @@
 class EntityModelError extends Error {
   EntityModelError(this.message);
 
+  @override
+  String toString() => "EntityModelError: $message";
+
   final String message;
 }
