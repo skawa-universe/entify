@@ -127,6 +127,8 @@ class Entity implements ApiRepresentation<ds.Entity> {
     _properties.addAll(other._properties);
   }
 
+  Set<String> get propertyNames => _properties.keys;
+
   /// Returns a property value.
   Object operator [](String name) => _properties[name];
 
