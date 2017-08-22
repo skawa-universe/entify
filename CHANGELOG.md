@@ -1,3 +1,10 @@
+## 0.2.1
+
+* Added `indexedIfNonNull`.
+* Entity now supports accessing property names, so properties are now enumerable.
+* Empty commits are handled.
+* The `setPropertiesFrom` in the `Entity` class allows future proof entity updates.
+
 ## 0.2.0
 
 * Added support for transactions.
