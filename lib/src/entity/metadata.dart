@@ -2,6 +2,7 @@
 /// Common interface for all property metadata objects.
 abstract class PropertyMetadata {
   bool get indexed;
+  bool get indexedIfNonNull;
 }
 
 /// Marks the field as persistent, mappable to entity properties.
@@ -10,8 +11,12 @@ class Persistent implements PropertyMetadata {
   /// should be declared on the getter. In this case the setter will be looked
   /// for and used, but its `Persistent` annotation is optional and will be
   /// ignored.
-  const Persistent(
-      {this.name = null, this.indexed = true, this.primaryKey = false});
+  const Persistent({
+    this.name = null,
+    this.indexed = true,
+    this.primaryKey = false,
+    this.indexedIfNonNull = false,
+  });
 
   /// Overrides the property name if not `null`. Otherwise the name will be
   /// the name of the field. Not applicable to primary keys.
@@ -19,6 +24,8 @@ class Persistent implements PropertyMetadata {
   /// Specifies whether the property should be indexed. The default is `true`.
   /// Not applicable to primary keys.
   final bool indexed;
+  /// Only indexed if the value is not `null`: `null` values are unindexed.
+  final bool indexedIfNonNull;
   /// Specifies whether the property defines the primary key for this entity.
   /// Every entity has to have a primary key field.
   final bool primaryKey;

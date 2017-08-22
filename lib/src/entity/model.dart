@@ -62,9 +62,12 @@ class EntityBridge<T> {
       throw new EntityModelError("Unrecognized key type: ${key.runtimeType}");
     }
 
-    for (EntityPropertyBridge prop in _propertyMetadata.values)
-      result.setValue(prop.name, prop.accessor.getValue(im),
-          indexed: prop.metadata.indexed);
+    for (EntityPropertyBridge prop in _propertyMetadata.values) {
+      final value = prop.accessor.getValue(im);
+      final bool indexed = prop.metadata.indexed &&
+          (!prop.metadata.indexedIfNonNull || value != null);
+      result.setValue(prop.name, value, indexed: indexed);
+    }
 
     return result;
   }

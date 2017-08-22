@@ -10,8 +10,11 @@ class EntityPropertyBridge {
       : this.accessor = accessor,
         this.name = name ?? accessor.name;
 
+  @override
   String toString() => metadata.indexed
-      ? "${name} <=> ${accessor.name}"
+      ? (metadata.indexedIfNonNull
+          ? "${name} <=> unindexedNull(${accessor.name})"
+          : "${name} <=> ${accessor.name}")
       : "${name} <=> unindexed(${accessor.name})";
 
   /// The entity property name.
