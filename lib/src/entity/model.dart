@@ -63,7 +63,9 @@ class EntityBridge<T> {
     }
 
     for (EntityPropertyBridge prop in _propertyMetadata.values) {
-      final value = prop.accessor.getValue(im);
+      var value = prop.accessor.getValue(im);
+      // flatten/duplicate iterables so there's no strange changes in lists
+      if (value is Iterable) value = value.toList();
       final bool indexed = prop.metadata.indexed &&
           (!prop.metadata.indexedIfNonNull || value != null);
       result.setValue(prop.name, value, indexed: indexed);
