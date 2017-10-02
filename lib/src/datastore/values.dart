@@ -1,5 +1,7 @@
-import "package:googleapis/datastore/v1.dart" as ds;
+import "dart:convert";
 import "dart:typed_data";
+
+import "package:googleapis/datastore/v1.dart" as ds;
 
 import "errors.dart";
 import "key.dart";
@@ -30,7 +32,7 @@ ds.Value toValue(Object obj, {bool excludeFromIndexes}) {
       bytes =
           typed.buffer.asUint8List(typed.offsetInBytes, typed.lengthInBytes);
     }
-    return result..blobValueAsBytes = bytes;
+    return result..blobValue = BASE64.encode(bytes);
   }
   if (obj is List) {
     result.excludeFromIndexes = null;

@@ -1,4 +1,5 @@
 import "dart:mirrors";
+import "dart:typed_data";
 
 import "accessors.dart";
 import "errors.dart";
@@ -65,7 +66,7 @@ class EntityBridge<T> {
     for (EntityPropertyBridge prop in _propertyMetadata.values) {
       var value = prop.accessor.getValue(im);
       // flatten/duplicate iterables so there's no strange changes in lists
-      if (value is Iterable) value = value.toList();
+      if (value is! TypedData && value is Iterable) value = value.toList();
       final bool indexed = prop.metadata.indexed &&
           (!prop.metadata.indexedIfNonNull || value != null);
       result.setValue(prop.name, value, indexed: indexed);
