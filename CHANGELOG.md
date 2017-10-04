@@ -1,3 +1,7 @@
+## 0.2.1+1
+
+* Fixed blob value handling
+
 ## 0.2.1
 
 * Added `indexedIfNonNull`.
