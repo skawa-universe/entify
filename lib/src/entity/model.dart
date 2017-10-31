@@ -98,6 +98,10 @@ class EntityBridge<T> {
   /// Creates a new [Query] object on the kind represented by this [EntityBridge] object.
   Query query() => new Query(kind);
 
+  bool entityKindMatches(Entity entity) => entity?.kind == kind;
+
+  bool keyKindMatches(Key key) => key?.kind == kind;
+
   String toString() =>
       "EntityBridge($kind, $_key, ${_propertyMetadata.values.join(", ")})";
 
