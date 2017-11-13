@@ -67,6 +67,8 @@ class EntityBridge<T> {
       var value = prop.accessor.getValue(im);
       // flatten/duplicate iterables so there's no strange changes in lists
       if (value is! TypedData && value is Iterable) value = value.toList();
+      if (value is Key && !value.isComplete)
+        throw new EntityModelError("Value of ${prop.name} is an incomplete key: $value!");
       final bool indexed = prop.metadata.indexed &&
           (!prop.metadata.indexedIfNonNull || value != null);
       result.setValue(prop.name, value, indexed: indexed);
