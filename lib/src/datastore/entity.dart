@@ -76,6 +76,9 @@ class Entity implements ApiRepresentation<ds.Entity> {
     }
   }
 
+  @override
+  String toString() => {"key": key, "properties": _properties, "unindexed": _unindexedProperties}.toString();
+
   /// Creates a `package:googleapis` object representation of this entity.
   ds.Entity toApiObject() => new ds.Entity()
     ..key = key.toApiObject()
