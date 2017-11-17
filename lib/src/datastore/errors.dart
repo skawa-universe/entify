@@ -23,6 +23,9 @@ class EntityNotFoundError extends DatastoreShellError {
 class WrappedServerError extends DatastoreShellError {
   WrappedServerError(String message, this.originalError) : super(message);
 
+  @override
+  String toString() => "${super.toString()}/${originalError.toString()}";
+
   final ds.DetailedApiRequestError originalError;
 }
 
