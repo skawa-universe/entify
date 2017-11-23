@@ -3,7 +3,7 @@
 * `Entity`: fixed `propertyNames` added `toString`
 * `WrappedServerError` will tell about the wrapped error in `toString`
 * Added a `null` check for the `kind` in the `Key` constructor
-* Incomplete `Key` values are checked (they can still fail mutations if they are in a list)
+* Incomplete `Key` values in entities are checked (they can still fail mutations if they are in a list)
 * Added `EntityBridge` methods that can be used as predicates: `entityKindMatches` and `keyKindMatches`
 
 ## 0.2.1+1
