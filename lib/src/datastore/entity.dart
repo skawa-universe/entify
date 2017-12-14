@@ -112,10 +112,13 @@ class Entity implements ApiRepresentation<ds.Entity> {
   /// Returns whether the given property is indexed (`true`) or not (`false`).
   bool isIndexed(String name) => !_unindexedProperties.contains(name);
 
+  /// Returns whether the given property is set.
+  bool containsProperty(String name) => _properties.containsKey(name);
+
   /// Removes the property by [name].
-  void remove(String name) {
-    _properties.remove(name);
+  Object remove(String name) {
     _unindexedProperties.remove(name);
+    return _properties.remove(name);
   }
 
   /// Removes all properties from this entity.
@@ -129,6 +132,7 @@ class Entity implements ApiRepresentation<ds.Entity> {
     _unindexedProperties.addAll(other._unindexedProperties);
     _properties.addAll(other._properties);
   }
+
 
   Iterable<String> get propertyNames => _properties.keys;
 

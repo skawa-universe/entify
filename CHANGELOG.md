@@ -1,3 +1,8 @@
+## 0.2.3
+
+* Added `containsProperty` to `Entity`
+* The `remove` method on `Entity` returns the previously set value.
+
 ## 0.2.2
 
 * `Entity`: fixed `propertyNames` added `toString`
