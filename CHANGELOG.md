@@ -2,6 +2,9 @@
 
 * Added `containsProperty` to `Entity`
 * The `remove` method on `Entity` returns the previously set value.
+* The read consistency can be specified with `get` calls
+* The default read consistency has been changed to `null` which means the service side
+  default, which is different what it used to be with `get` calls and ancestor queries.
 
 ## 0.2.2
 

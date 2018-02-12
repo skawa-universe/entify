@@ -7,6 +7,7 @@ import "key.dart";
 import "errors.dart";
 import "api_mapping.dart";
 import "mutations.dart";
+import "options.dart";
 
 /// Provides a useful interface over the `package:googleapis` `DatastoreApi` object.
 class DatastoreShell {
@@ -47,8 +48,8 @@ class DatastoreShell {
 
   /// Retrieves a single entity by key. Throws (asynchronously)
   /// [EntityNotFoundError] if the entity does not exist.
-  Future<Entity> getSingle(Key key) {
-    return getRaw([key]).then((ds.LookupResponse resp) {
+  Future<Entity> getSingle(Key key, {ReadConsistency readConsistency}) {
+    return getRaw([key], readConsistency: readConsistency).then((ds.LookupResponse resp) {
       if ((resp.deferred?.length ?? 0) > 0) throw new DatastoreShellError("Entity lookup deferred");
       if ((resp.missing?.length ?? 0) > 0) throw new EntityNotFoundError(key);
       return new Entity.fromApiObject(resp.found[0].entity);
@@ -57,8 +58,8 @@ class DatastoreShell {
 
   /// Retrieves multiple entities by their keys. The resulting map contains
   /// all existing entities, but no entries for the non-existing ones.
-  Future<Map<Key, Entity>> getAll(Iterable<Key> keys) {
-    return getRaw(keys).then((ds.LookupResponse resp) {
+  Future<Map<Key, Entity>> getAll(Iterable<Key> keys, {ReadConsistency readConsistency}) {
+    return getRaw(keys, readConsistency: readConsistency).then((ds.LookupResponse resp) {
       if ((resp.deferred?.length ?? 0) > 0) throw new DatastoreShellError("Entity lookup deferred: ${resp.deferred}");
       return new Map.fromIterable((resp.found ?? const []).map((item) => new Entity.fromApiObject(item.entity)),
           key: (e) => e.key);
@@ -66,16 +67,12 @@ class DatastoreShell {
   }
 
   /// Starts a lookup for a list of keys and returns with the raw API response.
-  Future<ds.LookupResponse> getRaw(Iterable<Key> keys) {
+  Future<ds.LookupResponse> getRaw(Iterable<Key> keys, {ReadConsistency readConsistency}) {
     ds.LookupRequest lr = new ds.LookupRequest();
     lr.keys = keys.map(ApiRepresentation.mapToApi).toList(growable: false);
     lr.readOptions = new ds.ReadOptions();
-    if (transactionId == null) {
-      lr.readOptions.readConsistency = "EVENTUAL";
-    } else {
-      lr.readOptions.readConsistency = null;
-      lr.readOptions.transaction = transactionId;
-    }
+    lr.readOptions.readConsistency = readConsistency?.name;
+    if (transactionId != null) lr.readOptions.transaction = transactionId;
     return api.projects.lookup(lr, project);
   }
 
@@ -193,12 +190,10 @@ class PreparedQuery {
     ds.RunQueryRequest qr = new ds.RunQueryRequest();
     qr.query = query;
     qr.readOptions = new ds.ReadOptions();
+    qr.readOptions.readConsistency = null;
     if (shell.isTransactional) {
       qr.readOptions
-        ..readConsistency = null
         ..transaction = shell.transactionId;
-    } else {
-      qr.readOptions..readConsistency = "EVENTUAL";
     }
     return shell.api.projects.runQuery(qr, shell.project);
   }
