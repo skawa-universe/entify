@@ -10,14 +10,11 @@ class ReadConsistency {
   static const List<ReadConsistency> values = const [strong, eventual];
 
   /// Look up read consistency by name.
-  static ReadConsistency lookup(String opName) {
+  static ReadConsistency lookup(String name) {
     if (_nameToValue == null) {
-      _nameToValue = {};
-      for (ReadConsistency op in values) {
-        _nameToValue[op.name] = op;
-      }
+      _nameToValue = new Map.fromIterable(values, key: (ReadConsistency value) => value.name);
     }
-    return _nameToValue[opName] ?? new ReadConsistency._(opName);
+    return _nameToValue[name] ?? new ReadConsistency._(name);
   }
 
   const ReadConsistency._(this.name);

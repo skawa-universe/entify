@@ -110,10 +110,7 @@ class FilterOperator {
 
   static FilterOperator lookup(String opName) {
     if (_opNameToOp == null) {
-      _opNameToOp = {};
-      for (FilterOperator op in values) {
-        _opNameToOp[op.opName] = op;
-      }
+      _opNameToOp = new Map.fromIterable(values, key: (FilterOperator op) => op.opName);
     }
     return _opNameToOp[opName] ?? new FilterOperator._(opName);
   }
@@ -211,10 +208,7 @@ class SortDirection {
   /// Look up sort direction by name.
   static SortDirection lookup(String opName) {
     if (_nameToSortDirection == null) {
-      _nameToSortDirection = {};
-      for (SortDirection op in values) {
-        _nameToSortDirection[op.name] = op;
-      }
+      _nameToSortDirection = new Map.fromIterable(values, key: (SortDirection dir) => dir.name);
     }
     return _nameToSortDirection[opName] ?? new SortDirection._(opName);
   }
