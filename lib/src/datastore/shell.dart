@@ -52,7 +52,7 @@ class DatastoreShell {
     return getRaw([key], readConsistency: readConsistency).then((ds.LookupResponse resp) {
       if ((resp.deferred?.length ?? 0) > 0) throw new DatastoreShellError("Entity lookup deferred");
       if ((resp.missing?.length ?? 0) > 0) throw new EntityNotFoundError(key);
-      return new Entity.fromApiObject(resp.found[0].entity);
+      return new Entity.fromEntityResult(resp.found[0]);
     });
   }
 
@@ -61,7 +61,7 @@ class DatastoreShell {
   Future<Map<Key, Entity>> getAll(Iterable<Key> keys, {ReadConsistency readConsistency}) {
     return getRaw(keys, readConsistency: readConsistency).then((ds.LookupResponse resp) {
       if ((resp.deferred?.length ?? 0) > 0) throw new DatastoreShellError("Entity lookup deferred: ${resp.deferred}");
-      return new Map.fromIterable((resp.found ?? const []).map((item) => new Entity.fromApiObject(item.entity)),
+      return new Map.fromIterable((resp.found ?? const []).map((item) => new Entity.fromEntityResult(item)),
           key: (e) => e.key);
     });
   }
@@ -155,7 +155,7 @@ class QueryResultBatch implements QueryResult<Entity> {
   QueryResultBatch(this.shell, ds.RunQueryResponse protocolResponse)
       : endCursor = protocolResponse.batch.endCursor,
         entities = protocolResponse.batch.entityResults
-                ?.map((er) => new Entity.fromApiObject(er.entity))
+                ?.map((er) => new Entity.fromEntityResult(er))
                 ?.toList(growable: false) ??
             [],
         isKeysOnly = protocolResponse.batch.entityResultType == "KEY_ONLY",

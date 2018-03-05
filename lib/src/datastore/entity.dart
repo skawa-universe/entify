@@ -48,7 +48,7 @@ class PropertyOutlet {
 class Entity implements ApiRepresentation<ds.Entity> {
   /// Creates an entity with a `null` key.
   ///
-  /// An entity in this state is not storeable, it must have at least an
+  /// An entity may not be inserted in this state, it must have at least an
   /// incomplete key (a key with kind, but no id or name).
   Entity();
 
@@ -60,8 +60,16 @@ class Entity implements ApiRepresentation<ds.Entity> {
   Entity.ofKind(String kind) : key = new Key(kind);
 
   /// Creates an entity from a `package:googleapis` object.
-  Entity.fromApiObject(ds.Entity entity)
-      : key = new Key.fromApiObject(entity.key) {
+  factory Entity.fromApiObject(ds.Entity entity) => new Entity._fromApiObject(entity);
+
+  /// Creates an entity from a `package:googleapis` `EntityResult` object, so the
+  /// version field is filled.
+  factory Entity.fromEntityResult(ds.EntityResult result) => new Entity._fromApiObject(result.entity,
+      version: result.version != null ? int.parse(result.version, radix: 10) : result.version);
+
+  Entity._fromApiObject(ds.Entity entity, {int version})
+      : key = new Key.fromApiObject(entity.key),
+        version = version {
     Map<String, ds.Value> values = entity.properties;
     if (values != null) {
       _properties.addAll(new Map.fromIterable(values.keys, value: (name) {
@@ -162,4 +170,7 @@ class Entity implements ApiRepresentation<ds.Entity> {
   Key key;
   final Map<String, Object> _properties = {};
   final Set<String> _unindexedProperties = new Set();
+
+  /// The datastore provided version
+  final int version;
 }
