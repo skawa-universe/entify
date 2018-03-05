@@ -118,6 +118,31 @@ main() {
       testListFromValue([1, "two", 3.3], excludeFromIndexes: exclude);
     }
   });
+
+  test("fromValue(mixed indexed list)", () {
+    List<Object> sample = [1, "two", 3.3];
+    List<bool> excludes = [null, true, false];
+    expect(sample.length, excludes.length, reason: "test case sanity check");
+    List<IndexedOverride<Object>> overridden = [];
+    for (int i = 0; i < sample.length; ++i) {
+      bool excluded = excludes[i % excludes.length];
+      bool indexed;
+      if (excluded != null) indexed = !excluded;
+      overridden.add(new IndexedOverride(sample[i], indexed: indexed));
+    }
+    for (bool exclude in [null, true, false]) {
+      ds.Value value = toValue(overridden, excludeFromIndexes: exclude);
+      expect(value.excludeFromIndexes, isNull);
+      expect(value.arrayValue, isNotNull);
+      List<ds.Value> values = value.arrayValue.values;
+      expect(values.length, 3);
+      for (int i = 0; i < excludes.length; ++i) {
+        expect(values[i].excludeFromIndexes, excludes[i]);
+        expect(values[i].toJson(), toValue(sample[i], excludeFromIndexes: excludes[i]).toJson());
+      }
+    }
+  });
+
   test(
     "fromValue(buffer)",
     () => testToValueWith("blobValue", shortListAsBytes, base64),

@@ -50,14 +50,14 @@ class Entity implements ApiRepresentation<ds.Entity> {
   ///
   /// An entity may not be inserted in this state, it must have at least an
   /// incomplete key (a key with kind, but no id or name).
-  Entity();
+  Entity() : version = null;
 
   /// Creates an entity with an incomplete key.
   ///
   /// An incomplete key is a key that has a kind, but no id or name. When an
   /// entity like this is inserted into the Datastore, an id is automatically
   /// generated for it.
-  Entity.ofKind(String kind) : key = new Key(kind);
+  Entity.ofKind(String kind) : key = new Key(kind), version = null;
 
   /// Creates an entity from a `package:googleapis` object.
   factory Entity.fromApiObject(ds.Entity entity) => new Entity._fromApiObject(entity);

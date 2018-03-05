@@ -6,6 +6,13 @@ import "package:googleapis/datastore/v1.dart" as ds;
 import "errors.dart";
 import "key.dart";
 
+class IndexedOverride<T> {
+  IndexedOverride(this.value, {this.indexed});
+
+  T value;
+  bool indexed;
+}
+
 /// Converts an arbitrary object to an API value.
 ///
 /// Apart from the basic types (`String`, `int`, `double`,
@@ -13,6 +20,11 @@ import "key.dart";
 /// `Key` (including native API `Key`) and (possibly
 /// heterogeneous) lists of these kinds are supported.
 ds.Value toValue(Object obj, {bool excludeFromIndexes}) {
+  if (obj is IndexedOverride) {
+    bool exclude;
+    if (obj.indexed != null) exclude = !obj.indexed;
+    return toValue(obj.value, excludeFromIndexes: exclude);
+  }
   if (obj is ds.Value) return obj;
   ds.Value result = new ds.Value();
   result.excludeFromIndexes = excludeFromIndexes;
