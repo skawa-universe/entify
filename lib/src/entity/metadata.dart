@@ -43,6 +43,18 @@ const Persistent primaryKey = const Persistent(primaryKey: true);
 /// Same as [persistent] except that this property value will be unindexed.
 const Persistent unindexed = const Persistent(indexed: false);
 
+/// Fields with type of `int` and marked with this annotation will be set to the
+/// entity version, or `null` if the entity version info is missing (for
+/// example all reads without strong consistency).
+class EntityVersion {
+  const EntityVersion();
+}
+
+/// Fields with type of `int` and marked with this annotation will be set to the
+/// entity version, or `null` if the entity version info is missing (for
+/// example all reads without strong consistency).
+const EntityVersion entityVersion = const EntityVersion();
+
 /// Marks the class as a persistent object, mappable to entities.
 class EntityModel {
   /// Marks the class as an entity model class.

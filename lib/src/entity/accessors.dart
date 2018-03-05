@@ -16,7 +16,7 @@ abstract class PropertyAccessor {
   /// Whether the property type is compatible with the given [type].
   bool acceptsType(Type type);
 
-  /// Sets the property [value] on the mirrorred [object].
+  /// Sets the property [value] on the mirrored [object].
   void setValue(InstanceMirror object, dynamic value);
 
   /// Returns the property value of the mirrored [object].

@@ -11,11 +11,13 @@ class EntityPropertyBridge {
         this.name = name ?? accessor.name;
 
   @override
-  String toString() => metadata.indexed
-      ? (metadata.indexedIfNonNull
-          ? "${name} <=> unindexedNull(${accessor.name})"
-          : "${name} <=> ${accessor.name}")
-      : "${name} <=> unindexed(${accessor.name})";
+  String toString() => metadata == null
+      ? "${name} <=> ${accessor.name}"
+      : metadata.indexed
+        ? (metadata.indexedIfNonNull
+            ? "${name} <=> unindexedNull(${accessor.name})"
+            : "${name} <=> ${accessor.name}")
+        : "${name} <=> unindexed(${accessor.name})";
 
   /// The entity property name.
   final String name;
@@ -56,21 +58,21 @@ class EntityMetadataBuilder {
   }
 
   void _process(ClassMirror s) {
-    final Map<Symbol, DeclarationMirror> decls = s.declarations;
-    for (Symbol fieldName in decls.keys) {
+    final Map<Symbol, DeclarationMirror> declarations = s.declarations;
+    for (Symbol fieldName in declarations.keys) {
       String fieldNameAsString = MirrorSystem.getName(fieldName);
-      DeclarationMirror decl = decls[fieldName];
+      DeclarationMirror declaration = declarations[fieldName];
       PropertyAccessor accessor = null;
-      if (decl is VariableMirror) {
-        VariableMirror vm = decl;
+      if (declaration is VariableMirror) {
+        VariableMirror vm = declaration;
         if (vm.isStatic) continue;
         accessor = new FieldPropertyAccessor(vm);
       }
-      if (decl is MethodMirror) {
-        MethodMirror mm = decl;
+      if (declaration is MethodMirror) {
+        MethodMirror mm = declaration;
         if (mm.isStatic || !mm.isGetter) continue;
         String setterName = "${MirrorSystem.getName(mm.simpleName)}=";
-        MethodMirror setter = decls[new Symbol(setterName)];
+        MethodMirror setter = declarations[new Symbol(setterName)];
         // setter may be null, but that's OK
         accessor = new MethodPropertyAccessor(mm, setter);
       }
@@ -79,7 +81,7 @@ class EntityMetadataBuilder {
 
       String propertyName = null;
       Persistent p = null;
-      for (InstanceMirror im in decl.metadata) {
+      for (InstanceMirror im in declaration.metadata) {
         if (im.reflectee is Persistent) {
           p = im.reflectee;
           if (p.primaryKey)
@@ -87,6 +89,8 @@ class EntityMetadataBuilder {
           else
             propertyName = im.reflectee.name ?? fieldNameAsString;
           break;
+        } else if (im.reflectee is EntityVersion && accessor.acceptsType(int)) {
+          versionFields.add(new EntityPropertyBridge._(null, null, accessor));
         }
       }
       if (p != null && propertyName != null) {
@@ -100,5 +104,8 @@ class EntityMetadataBuilder {
 
   String kind = null;
   final Map<String, EntityPropertyBridge> propertyMetadata = {};
+
   EntityPropertyBridge key = null;
+
+  final List<EntityPropertyBridge> versionFields = [];
 }

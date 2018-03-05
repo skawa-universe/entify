@@ -30,7 +30,7 @@ class EntityBridge<T> {
   /// should do every time.
   factory EntityBridge.uniqueFromClass(Type type) {
     EntityMetadataBuilder b = new EntityMetadataBuilder.fromClass(type);
-    return new EntityBridge._(b.kind, b.key, b.propertyMetadata);
+    return new EntityBridge._(b.kind, b.key, new Map.unmodifiable(b.propertyMetadata), new List.unmodifiable(b.versionFields));
   }
 
   /// Constructs or returns a cached [EntityBridge] object based on
@@ -39,7 +39,7 @@ class EntityBridge<T> {
     return new EntityBridge<T>.fromClass(T);
   }
 
-  EntityBridge._(this.kind, this._key, this._propertyMetadata);
+  EntityBridge._(this.kind, this._key, this._propertyMetadata, this._versionFields);
 
   Key createKey({String name, int id, Key parent}) =>
       new Key(kind, name: name, id: id, parent: parent);
@@ -92,6 +92,8 @@ class EntityBridge<T> {
         keyAccessor.setValue(im, key.name);
       }
     }
+    for (EntityPropertyBridge prop in _versionFields)
+      prop.accessor.setValue(im, source.version);
     for (EntityPropertyBridge prop in _propertyMetadata.values)
       prop.accessor.setValue(im, source[prop.name]);
     return target;
@@ -111,6 +113,7 @@ class EntityBridge<T> {
   final String kind;
   final EntityPropertyBridge _key;
   final Map<String, EntityPropertyBridge> _propertyMetadata;
+  final List<EntityPropertyBridge> _versionFields;
 
   static final Map<Type, dynamic> _cachedBridges = {};
 }
