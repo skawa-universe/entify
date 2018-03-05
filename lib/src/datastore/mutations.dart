@@ -160,11 +160,18 @@ class MutationBatchResponse {
         if (_conflictDetected == null) _conflictDetected = new List.filled(_size, null);
         _conflictDetected[index] = true;
       }
+      if (result.version != null) {
+        if (_versions == null) _versions = new List.filled(_size, null);
+        _versions[index] = int.parse(result.version, radix: 10);
+      }
       if (result.key != null) {
         if (_keys == null) _keys = new List.filled(_size, null);
         _keys[index] = new Key.fromApiObject(result.key);
       }
     });
+    if (_keys != null) _keys = new List.unmodifiable(_keys);
+    if (_versions != null) _versions = new List.unmodifiable(_versions);
+    if (_conflictDetected != null) _conflictDetected = new List.unmodifiable(_conflictDetected);
   }
 
   /// Returns the keys that have been generated.
@@ -172,19 +179,17 @@ class MutationBatchResponse {
   /// Every element corresponds to a mutation in the batch and is set to
   /// the key that was generated or `null` if no key generation was necessary
   /// for the corresponding mutation.
-  List<Key> get keys {
-    if (_keys == null) _keys = new List.filled(_size, null);
-    return _keys;
-  }
+  List<Key> get keys => _keys ??= new List.unmodifiable(new List.filled(_size, null));
 
-  List<bool> get conflictDetected {
-    if (_conflictDetected == null) _conflictDetected = new List.filled(_size, false);
-    return _conflictDetected;
-  }
+  /// Returns the version numbers of the entities that have just been written.
+  List<int> get versions => _versions ??= new List.unmodifiable(new List.filled(_size, null));
+
+  List<bool> get conflictDetected => _conflictDetected ??= new List.unmodifiable(new List.filled(_size, false));
 
   bool get hasConflicts => _hasConflicts;
 
   List<Key> _keys;
+  List<int> _versions;
   List<bool> _conflictDetected;
   bool _hasConflicts;
 
