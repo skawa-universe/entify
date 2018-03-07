@@ -79,8 +79,9 @@ Object fromValue(ds.Value value) {
 
   // Nulls are represented in surprising ways
   Map json = value.toJson();
-  if (json.isEmpty ||
-      json.length == 1 && json.containsKey("excludeFromIndexes")) return null;
+  json.remove("excludeFromIndexes");
+  json.remove("meaning");
+  if (json.isEmpty) return null;
 
   throw new DatastoreShellError("Unknown value type: ${value.toJson()}");
 }
