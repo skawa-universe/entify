@@ -59,17 +59,27 @@ class DatastoreShell {
   /// Retrieves multiple entities by their keys. The resulting map contains
   /// all existing entities, but no entries for the non-existing ones.
   Future<Map<Key, Entity>> getAll(Iterable<Key> keys, {ReadConsistency readConsistency}) {
-    return getRaw(keys, readConsistency: readConsistency).then((ds.LookupResponse resp) {
-      if ((resp.deferred?.length ?? 0) > 0) throw new DatastoreShellError("Entity lookup deferred: ${resp.deferred}");
-      return new Map.fromIterable((resp.found ?? const []).map((item) => new Entity.fromEntityResult(item)),
+    return getRaw(keys, readConsistency: readConsistency).then((ds.LookupResponse resp) async {
+      List<ds.EntityResult> found = resp.found ?? [];
+      while (resp.deferred?.isNotEmpty ?? false) {
+        if (resp.found?.isEmpty ?? true) {
+          throw new DatastoreShellError("Entity lookup deferred, but not a single one more returned: ${resp.deferred}");
+        }
+        resp = await getRawKeys(resp.deferred, readConsistency: readConsistency);
+        if (resp.found != null) found.addAll(resp.found);
+      }
+      return new Map.fromIterable((found ?? const []).map((item) => new Entity.fromEntityResult(item)),
           key: (e) => e.key);
     });
   }
 
   /// Starts a lookup for a list of keys and returns with the raw API response.
-  Future<ds.LookupResponse> getRaw(Iterable<Key> keys, {ReadConsistency readConsistency}) {
+  Future<ds.LookupResponse> getRaw(Iterable<Key> keys, {ReadConsistency readConsistency}) =>
+      getRawKeys(keys.map(ApiRepresentation.mapToApi).toList(growable: false), readConsistency: readConsistency);
+
+  Future<ds.LookupResponse> getRawKeys(Iterable<ds.Key> rawKeys, {ReadConsistency readConsistency}) {
     ds.LookupRequest lr = new ds.LookupRequest();
-    lr.keys = keys.map(ApiRepresentation.mapToApi).toList(growable: false);
+    lr.keys = rawKeys;
     lr.readOptions = new ds.ReadOptions();
     lr.readOptions.readConsistency = readConsistency?.name;
     if (transactionId != null) lr.readOptions.transaction = transactionId;
@@ -192,8 +202,7 @@ class PreparedQuery {
     qr.readOptions = new ds.ReadOptions();
     qr.readOptions.readConsistency = null;
     if (shell.isTransactional) {
-      qr.readOptions
-        ..transaction = shell.transactionId;
+      qr.readOptions..transaction = shell.transactionId;
     }
     return shell.api.projects.runQuery(qr, shell.project);
   }
