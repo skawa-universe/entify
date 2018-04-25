@@ -11,7 +11,7 @@ typedef void CommitCallback(MutationBatch batch);
 /// Represents a set of mutations that can be submitted with a commit call
 /// (either transactionally or nontransactionally).
 class MutationBatch {
-  MutationBatch(this.shell, {CommitCallback onCommit}): _commitCallback = onCommit;
+  MutationBatch(this.shell, {CommitCallback onCommit}) : _commitCallback = onCommit;
 
   /// Adds an `insert` mutation to this batch.
   ///
@@ -136,8 +136,13 @@ class MutationBatch {
     return shell.api.projects.commit(req, shell.project);
   }
 
+  Iterable<Key> get relatedKeys =>
+      mutations.map(_mutationKey).where((ds.Key key) => key != null).map((ds.Key key) => new Key.fromApiObject(key));
+
   @deprecated
   Future<ds.CommitResponse> executeRaw() => commitRaw();
+
+  static ds.Key _mutationKey(ds.Mutation m) => m.update?.key ?? m.insert?.key ?? m.upsert?.key ?? m.delete;
 
   /// Provides an access to all the mutations the object has generated for tinkering.
   List<ds.Mutation> mutations = [];
