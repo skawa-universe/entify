@@ -96,12 +96,12 @@ class EntityBridge<T> {
       }
     }
     for (EntityPropertyBridge prop in _versionFields) {
-      if (!(prop.metadata.skipIfMissing ?? defaultSkip) || source.version != null) {
+      if (!(prop.metadata?.skipIfMissing ?? defaultSkip) || source.version != null) {
         prop.accessor.setValue(im, source.version);
       }
     }
     for (EntityPropertyBridge prop in _propertyMetadata.values) {
-      if (!(prop.metadata.skipIfMissing ?? defaultSkip) || source.containsProperty(prop.name)) {
+      if (!(prop.metadata?.skipIfMissing ?? defaultSkip) || source.containsProperty(prop.name)) {
         prop.accessor.setValue(im, source[prop.name]);
       }
     }
