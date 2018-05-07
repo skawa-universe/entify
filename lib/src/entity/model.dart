@@ -2,6 +2,7 @@ import "dart:mirrors";
 import "dart:typed_data";
 
 import "accessors.dart";
+import "metadata.dart";
 import "errors.dart";
 import "builder.dart";
 import "../datastore/entity.dart";
@@ -30,7 +31,8 @@ class EntityBridge<T> {
   /// should do every time.
   factory EntityBridge.uniqueFromClass(Type type) {
     EntityMetadataBuilder b = new EntityMetadataBuilder.fromClass(type);
-    return new EntityBridge._(b.kind, b.key, new Map.unmodifiable(b.propertyMetadata), new List.unmodifiable(b.versionFields));
+    return new EntityBridge._(b.descriptor, b.kind, b.key, new Map.unmodifiable(b.propertyMetadata),
+        new List.unmodifiable(b.versionFields));
   }
 
   /// Constructs or returns a cached [EntityBridge] object based on
@@ -39,7 +41,7 @@ class EntityBridge<T> {
     return new EntityBridge<T>.fromClass(T);
   }
 
-  EntityBridge._(this.kind, this._key, this._propertyMetadata, this._versionFields);
+  EntityBridge._(this.descriptor, this.kind, this._key, this._propertyMetadata, this._versionFields);
 
   Key createKey({String name, int id, Key parent}) =>
       new Key(kind, name: name, id: id, parent: parent);
@@ -83,19 +85,26 @@ class EntityBridge<T> {
     InstanceMirror im = reflect(target);
     Key key = source.key;
     PropertyAccessor keyAccessor = _key.accessor;
+    bool defaultSkip = descriptor.skipMissingProperties ?? false;
     if (keyAccessor.acceptsType(Key)) {
       keyAccessor.setValue(im, key);
-    } else if (key.isComplete) {
+    } else if (key?.isComplete ?? false) {
       if (key.id != null && keyAccessor.acceptsType(int)) {
         keyAccessor.setValue(im, key.id);
       } else if (key.name != null && keyAccessor.acceptsType(String)) {
         keyAccessor.setValue(im, key.name);
       }
     }
-    for (EntityPropertyBridge prop in _versionFields)
-      prop.accessor.setValue(im, source.version);
-    for (EntityPropertyBridge prop in _propertyMetadata.values)
-      prop.accessor.setValue(im, source[prop.name]);
+    for (EntityPropertyBridge prop in _versionFields) {
+      if (!(prop.metadata.skipIfMissing ?? defaultSkip) || source.version != null) {
+        prop.accessor.setValue(im, source.version);
+      }
+    }
+    for (EntityPropertyBridge prop in _propertyMetadata.values) {
+      if (!(prop.metadata.skipIfMissing ?? defaultSkip) || source.containsProperty(prop.name)) {
+        prop.accessor.setValue(im, source[prop.name]);
+      }
+    }
     return target;
   }
 
@@ -109,6 +118,7 @@ class EntityBridge<T> {
   String toString() =>
       "EntityBridge($kind, $_key, ${_propertyMetadata.values.join(", ")})";
 
+  final EntityModel descriptor;
   /// The kind this [EntityBridge] instance represents.
   final String kind;
   final EntityPropertyBridge _key;

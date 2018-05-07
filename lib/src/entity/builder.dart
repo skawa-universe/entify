@@ -42,10 +42,12 @@ class EntityMetadataBuilder {
         break;
       }
     }
-    if (desc == null)
+    if (desc == null) {
       throw new EntityModelError(
           "Type is not entity model: ${leaf.reflectedType}");
+    }
     kind = desc.kind ?? MirrorSystem.getName(leaf.simpleName);
+    descriptor = desc;
     for (ClassMirror current = leaf;
         current != null;
         current = current.superclass) {
@@ -104,6 +106,8 @@ class EntityMetadataBuilder {
 
   String kind = null;
   final Map<String, EntityPropertyBridge> propertyMetadata = {};
+
+  EntityModel descriptor;
 
   EntityPropertyBridge key = null;
 

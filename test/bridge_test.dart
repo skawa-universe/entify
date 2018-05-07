@@ -40,6 +40,36 @@ class TestClass {
   String get generatedField => name.toUpperCase();
 }
 
+@EntityModel(skipMissingProperties: true)
+class SkipMissing {
+  @primaryKey
+  int key;
+
+  @persistent
+  int alpha;
+
+  @persistent
+  String beta = "foo";
+
+  @Persistent(skipIfMissing: false)
+  bool gamma = false;
+}
+
+@entityModel
+class NoSkipMissing {
+  @primaryKey
+  int key;
+
+  @persistent
+  int alpha;
+
+  @persistent
+  String beta = "foo";
+
+  @Persistent(skipIfMissing: true)
+  bool gamma = false;
+}
+
 main() {
   test("Basic serialization", () {
     const List<int> bytesAsList = const <int>[0, 50, 100, 150, 200, 250];
@@ -92,5 +122,27 @@ main() {
     expect((){
       new EntityBridge<TestClass>();
     }, isNot(throwsA(anything)));
+  });
+
+  test("EntityBridge skips missing properties", () {
+    NoSkipMissing nsm = new NoSkipMissing();
+    nsm.key = 3;
+    SkipMissing sm = new SkipMissing();
+    sm.key = 3;
+    Entity e = new Entity();
+    e.indexed["alpha"] = 7;
+    EntityBridge<SkipMissing> bridge = new EntityBridge<SkipMissing>();
+    EntityBridge<NoSkipMissing> nonSkippingBridge = new EntityBridge<NoSkipMissing>();
+    bridge.fromEntity(e, sm);
+    nonSkippingBridge.fromEntity(e, nsm);
+    expect(sm.key, 3);
+    expect(sm.alpha, 7);
+    expect(sm.beta, "foo");
+    expect(sm.gamma, isNull);
+
+    expect(nsm.key, 3);
+    expect(nsm.alpha, 7);
+    expect(nsm.beta, isNull);
+    expect(nsm.gamma, false);
   });
 }

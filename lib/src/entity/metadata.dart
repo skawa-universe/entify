@@ -3,6 +3,7 @@
 abstract class PropertyMetadata {
   bool get indexed;
   bool get indexedIfNonNull;
+  bool get skipIfMissing;
 }
 
 /// Marks the field as persistent, mappable to entity properties.
@@ -12,10 +13,11 @@ class Persistent implements PropertyMetadata {
   /// for and used, but its `Persistent` annotation is optional and will be
   /// ignored.
   const Persistent({
-    this.name = null,
-    this.indexed = true,
-    this.primaryKey = false,
-    this.indexedIfNonNull = false,
+    this.name: null,
+    this.indexed: true,
+    this.primaryKey: false,
+    this.indexedIfNonNull: false,
+    this.skipIfMissing: null,
   });
 
   /// Overrides the property name if not `null`. Otherwise the name will be
@@ -29,6 +31,9 @@ class Persistent implements PropertyMetadata {
   /// Specifies whether the property defines the primary key for this entity.
   /// Every entity has to have a primary key field.
   final bool primaryKey;
+  /// When bridging from an entity leave this property alone if it is missing in the entity,
+  /// or `null` to use the default specified in [EntityModel].
+  final bool skipIfMissing;
 }
 
 /// Persistent with default settings.
@@ -62,9 +67,10 @@ class EntityModel {
   /// Use the [kind] parameter to optionally override the entity kind. If
   /// [kind] is set to `null` (or is omitted) the kind will be the entity model
   /// class name.
-  const EntityModel({this.kind = null});
+  const EntityModel({this.kind: null, this.skipMissingProperties: false});
 
   final String kind;
+  final bool skipMissingProperties;
 }
 
 /// Attribute for entity model classes with the default kind name (the class

@@ -1,3 +1,15 @@
+## 0.2.4
+
+* Added an option to the `EntityBridge` metadata classes skip setting properties that
+  are missing in the entity.
+* Introduced `version` in `Entity` that saves the `version` in the fetch and query
+  results.
+* EntityBridge can set version fields if they are available.
+* `MutationBatch` can return the affected keys with `relatedKeys`.
+* All `get` functions now handle deferred reads automatically.
+* Introduced the `IndexOverride` wrapper which can override whether an entity model
+  field value has to be indexed or not.
+
 ## 0.2.3
 
 * Added `containsProperty` to `Entity`
