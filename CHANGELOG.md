@@ -1,3 +1,7 @@
+## 0.3.0
+
+* Entity kind is checked on deserialization (but can be disabled)
+
 ## 0.2.4
 
 * Added an option to the `EntityBridge` metadata classes skip setting properties that

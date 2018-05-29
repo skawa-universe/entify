@@ -67,10 +67,11 @@ class EntityModel {
   /// Use the [kind] parameter to optionally override the entity kind. If
   /// [kind] is set to `null` (or is omitted) the kind will be the entity model
   /// class name.
-  const EntityModel({this.kind: null, this.skipMissingProperties: false});
+  const EntityModel({this.kind: null, this.skipMissingProperties: false, this.checkKeyKind: true});
 
   final String kind;
   final bool skipMissingProperties;
+  final bool checkKeyKind;
 }
 
 /// Attribute for entity model classes with the default kind name (the class

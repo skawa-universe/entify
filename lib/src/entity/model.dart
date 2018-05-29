@@ -86,6 +86,8 @@ class EntityBridge<T> {
     Key key = source.key;
     PropertyAccessor keyAccessor = _key.accessor;
     bool defaultSkip = descriptor.skipMissingProperties ?? false;
+    if ((descriptor.checkKeyKind ?? true) && key != null && key.kind != kind)
+      throw new ArgumentError.value(source, "source", "key kind is not $kind");
     if (keyAccessor.acceptsType(Key)) {
       keyAccessor.setValue(im, key);
     } else if (key?.isComplete ?? false) {
