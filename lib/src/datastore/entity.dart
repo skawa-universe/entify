@@ -103,6 +103,11 @@ class Entity implements ApiRepresentation<ds.Entity> {
   /// Sets the property named [name] to the value [value] and makes it (un)[indexed]
   /// (default is indexed).
   void setValue(String name, Object value, {bool indexed: true}) {
+    if (value is IndexedOverride) {
+      IndexedOverride override = value;
+      indexed = override.indexed;
+      value = override.value;
+    }
     _properties[name] = value;
     setIndexed(name, indexed: indexed);
   }

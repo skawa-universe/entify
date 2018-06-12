@@ -1,6 +1,8 @@
 ## 0.3.0
 
 * Entity kind is checked on deserialization (but can be disabled)
+* `IndexedOverride` is checked and stripped in `Entity` (though not for iterable
+  value items)
 
 ## 0.2.4
 
