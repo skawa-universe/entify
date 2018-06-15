@@ -100,17 +100,7 @@ class MutationBatch {
   Future<MutationBatchResponse> commit() =>
       commitRaw().then((ds.CommitResponse resp) => new MutationBatchResponse(shell, resp), onError: (error) {
         if (error is ds.DetailedApiRequestError) {
-          if (error.status == 400 || error.status == 409) {
-            throw new DatastoreConflictError(
-                error.status == 400
-                    ? "An insert/update mutation could not be completed"
-                    : "The transaction ran into a conflict",
-                error);
-          } else if (error.status == 500) {
-            throw new DatastoreTransientError(error.message ?? "A transient error has occured", error);
-          } else {
-            throw new UnknownDatastoreError(error.message, error);
-          }
+          DatastoreShell.wrapAndThrow(error);
         }
         throw error;
       });

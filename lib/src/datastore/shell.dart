@@ -83,7 +83,9 @@ class DatastoreShell {
     lr.readOptions = new ds.ReadOptions();
     lr.readOptions.readConsistency = readConsistency?.name;
     if (transactionId != null) lr.readOptions.transaction = transactionId;
-    return api.projects.lookup(lr, project);
+    return api.projects.lookup(lr, project).catchError((e) {
+      wrapAndThrow(e);
+    }, test: (e) => e is ds.DetailedApiRequestError);
   }
 
   Future<T> runTransaction<T>(Future<T> transactionBody(DatastoreShell transactionShell),
@@ -99,7 +101,11 @@ class DatastoreShell {
       --retryCount;
       DatastoreShell transactional = await beginTransaction();
       try {
-        return await transactionBody(transactional);
+        try {
+          return await transactionBody(transactional);
+        } on ds.DetailedApiRequestError catch (e) {
+          wrapAndThrow(e);
+        }
       } on DatastoreConflictError catch (e) {
         lastError = e;
         if (errorCallback != null) errorCallback(e);
@@ -122,6 +128,20 @@ class DatastoreShell {
   static Duration defaultExponentialStepDown(Duration previousDuration) {
     if (previousDuration.compareTo(const Duration(seconds: 10)) >= 0) return previousDuration;
     return previousDuration * 2;
+  }
+
+  static void wrapAndThrow(ds.DetailedApiRequestError error) {
+    if (error.status == 400 || error.status == 409) {
+      throw new DatastoreConflictError(
+          error.status == 400
+              ? "An insert/update mutation could not be completed"
+              : "The transaction ran into a conflict",
+          error);
+    } else if (error.status == 500) {
+      throw new DatastoreTransientError(error.message ?? "A transient error has occured", error);
+    } else {
+      throw new UnknownDatastoreError(error.message, error);
+    }
   }
 
   /// Starts a mutation batch.

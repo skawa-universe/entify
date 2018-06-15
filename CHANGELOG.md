@@ -3,6 +3,7 @@
 * Entity kind is checked on deserialization (but can be disabled)
 * `IndexedOverride` is checked and stripped in `Entity` (though not for iterable
   value items)
+* Improved error handling
 
 ## 0.2.4
 
