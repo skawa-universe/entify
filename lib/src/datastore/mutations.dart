@@ -3,7 +3,6 @@ import "package:googleapis/datastore/v1.dart" as ds;
 
 import "shell.dart";
 import "entity.dart";
-import "errors.dart";
 import "key.dart";
 
 typedef void CommitCallback(MutationBatch batch);
