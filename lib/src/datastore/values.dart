@@ -9,6 +9,9 @@ import "key.dart";
 class IndexedOverride<T> {
   IndexedOverride(this.value, {this.indexed});
 
+  @override
+  String toString() => "IndexedOverride($value, indexed: $indexed)";
+
   T value;
   bool indexed;
 }
