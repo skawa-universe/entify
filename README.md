@@ -17,7 +17,7 @@ class Species {
   Species();
 
   // You can use a factory constructor for setting up an object from an entity.
-  // This isn't really needed, I just like to create these shorthand cosntructors,
+  // This isn't really needed, I just like to create these shorthand constructors,
   // the bridge.fromEntity can be called anywhere.
   factory Species.fromEntity(Entity e) => bridge.fromEntity(e, new Species());
 
@@ -49,9 +49,6 @@ class Species {
   @persistent
   List<String> get taxonomyPaths { /* ... */ }
 
-  // But currently EntityBridge requires a setter
-  set taxonomyPaths(List<String> doesntMatter) {}
-
   // This is a non-persistent property.
   String get fullTaxonomyPath => taxonomy.join('/');
 }
@@ -62,7 +59,7 @@ You can save some objects just by calling:
 Future<Null> insertOrUpdateSpecies(DatastoreShell dsh, Iterable<Species> species) async {
   await (dsh.beginMutation()
       ..upsertAll(species.map((s) => s.toEntity())))
-    .execute();
+    .commit();
 }
 ```
 
