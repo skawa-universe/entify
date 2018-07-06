@@ -1,13 +1,15 @@
 ## 0.3.0
 
 * Entity kind is checked on deserialization (but can be disabled)
-* `IndexedOverride` is checked and stripped in `Entity` (though not for iterable
-  value items)
+* `IndexedOverride` is checked and stripped in `Entity` (though not for iterable value items, that
+  is taken care of during API value object conversion)
 * Improved error handling
 * Introduced value deep copy to `Entity.setPropertiesFrom`, which will duplicate iterables (as lists),
   the default behavior is to shallow copy values
 * Added an `Entity.copy` constructor, which will by default create a deep copy of an entity, but this
-  can be overridden.
+  can be overridden
+* The EntityBridge uses metadata from both the getter and setter (previously only the getter was taken
+  into account)
 
 ## 0.2.4
 

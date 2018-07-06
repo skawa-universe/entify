@@ -63,8 +63,9 @@ class EntityMetadataBuilder {
     final Map<Symbol, DeclarationMirror> declarations = s.declarations;
     for (Symbol fieldName in declarations.keys) {
       String fieldNameAsString = MirrorSystem.getName(fieldName);
-      DeclarationMirror declaration = declarations[fieldName];
-      PropertyAccessor accessor = null;
+      final DeclarationMirror declaration = declarations[fieldName];
+      List<InstanceMirror> metadata = declaration.metadata;
+      PropertyAccessor accessor;
       if (declaration is VariableMirror) {
         VariableMirror vm = declaration;
         if (vm.isStatic) continue;
@@ -77,13 +78,18 @@ class EntityMetadataBuilder {
         MethodMirror setter = declarations[new Symbol(setterName)];
         // setter may be null, but that's OK
         accessor = new MethodPropertyAccessor(mm, setter);
+        if (setter != null) {
+          // create a shallow copy of the list first
+          metadata = metadata.toList();
+          metadata.addAll(setter.metadata);
+        }
       }
 
       if (accessor == null) continue;
 
       String propertyName = null;
       Persistent p = null;
-      for (InstanceMirror im in declaration.metadata) {
+      for (InstanceMirror im in metadata) {
         if (im.reflectee is Persistent) {
           p = im.reflectee;
           if (p.primaryKey)
