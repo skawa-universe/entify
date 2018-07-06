@@ -67,6 +67,10 @@ class Entity implements ApiRepresentation<ds.Entity> {
   factory Entity.fromEntityResult(ds.EntityResult result) => new Entity._fromApiObject(result.entity,
       version: result.version != null ? int.parse(result.version, radix: 10) : result.version);
 
+  Entity.copy(Entity other, {bool deepCopy: true}): key = other.key, version = other.version {
+    setPropertiesFrom(other, deepCopyValues: deepCopy);
+  }
+
   Entity._fromApiObject(ds.Entity entity, {int version})
       : key = new Key.fromApiObject(entity.key),
         version = version {
@@ -140,10 +144,19 @@ class Entity implements ApiRepresentation<ds.Entity> {
     _unindexedProperties.clear();
   }
 
-  void setPropertiesFrom(Entity other) {
+  void setPropertiesFrom(Entity other, {bool deepCopyValues: false}) {
     _unindexedProperties.removeAll(other._properties.keys);
     _unindexedProperties.addAll(other._unindexedProperties);
-    _properties.addAll(other._properties);
+    if (deepCopyValues) {
+      for (String key in other._properties.keys) {
+        dynamic val = other._properties[key];
+        // make a copy if it's a collection
+        if (val is Iterable) val = val.toList();
+        _properties[key] = val;
+      }
+    } else {
+      _properties.addAll(other._properties);
+    }
   }
 
 

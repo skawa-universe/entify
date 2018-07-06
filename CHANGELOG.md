@@ -4,6 +4,10 @@
 * `IndexedOverride` is checked and stripped in `Entity` (though not for iterable
   value items)
 * Improved error handling
+* Introduced value deep copy to `Entity.setPropertiesFrom`, which will duplicate iterables (as lists),
+  the default behavior is to shallow copy values
+* Added an `Entity.copy` constructor, which will by default create a deep copy of an entity, but this
+  can be overridden.
 
 ## 0.2.4
 
