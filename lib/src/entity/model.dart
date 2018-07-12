@@ -104,6 +104,9 @@ class EntityBridge<T> {
     }
     for (EntityPropertyBridge prop in _propertyMetadata.values) {
       if (!(prop.metadata?.skipIfMissing ?? defaultSkip) || source.containsProperty(prop.name)) {
+        dynamic value = source[prop.name];
+        // copy lists so there's no strange changes in lists
+        if (value is! TypedData && value is Iterable) value = value.toList();
         prop.accessor.setValue(im, source[prop.name]);
       }
     }
