@@ -176,7 +176,10 @@ abstract class QueryResult<T> {
 class GenericQueryResult<T> implements QueryResult<T> {
   GenericQueryResult(this.entities, this.endCursor);
 
+  @override
   final Iterable<T> entities;
+
+  @override
   final String endCursor;
 }
 
@@ -193,9 +196,11 @@ class QueryResultBatch implements QueryResult<Entity> {
         isFull = protocolResponse.batch.entityResultType == "FULL";
 
   /// The cursor that points after the last entity returned.
+  @override
   final String endCursor;
 
   /// The list of entities.
+  @override
   final List<Entity> entities;
 
   final bool isKeysOnly;

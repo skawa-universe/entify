@@ -20,7 +20,7 @@ class Key implements ApiRepresentation<ds.Key> {
 
   /// Creates a key from the `package:googleapis` representation.
   factory Key.fromApiObject(ds.Key key) {
-    Key lastKey = null;
+    Key lastKey;
     for (ds.PathElement element in key.path) {
       lastKey = new Key(element.kind,
           name: element.name,
@@ -31,12 +31,14 @@ class Key implements ApiRepresentation<ds.Key> {
   }
 
   /// Converts the key to the `package:googleapis` representation.
+  @override
   ds.Key toApiObject() => new ds.Key()..path = _buildPath();
 
   /// Returns whether the key is complete: an incomplete key has no
   /// name nor id.
   bool get isComplete => name != null || id != null;
 
+  @override
   String toString() => "${parent?.toString() ?? ''}${parent == null ? '' : '/'}$kind"
       "(${id == null ? '' : id}"
       "${name == null ? '' : '\"$name\"'})";
@@ -52,9 +54,11 @@ class Key implements ApiRepresentation<ds.Key> {
       return parent._buildPath()..add(e);
   }
 
+  @override
   int get hashCode => combineHash(kind.hashCode,
       combineHash(id.hashCode, combineHash(name.hashCode, parent.hashCode)));
 
+  @override
   bool operator ==(dynamic other) =>
       other is Key &&
       kind == other.kind &&

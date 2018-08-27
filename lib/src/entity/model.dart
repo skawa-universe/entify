@@ -14,6 +14,12 @@ import "../datastore/query.dart";
 /// The type parameter [T] must be the same class that is passed to the constructor
 /// (or pass the type to the default constructor as a generic type parameter).
 class EntityBridge<T> {
+  /// Constructs or returns a cached [EntityBridge] object based on
+  /// the type parameter [T].
+  factory EntityBridge() {
+    return new EntityBridge<T>.fromClass(T);
+  }
+
   /// Constructs an entity mapper object based on [type].
   ///
   /// Uses an internal cache of [EntityBridge] objects.
@@ -33,12 +39,6 @@ class EntityBridge<T> {
     EntityMetadataBuilder b = new EntityMetadataBuilder.fromClass(type);
     return new EntityBridge._(b.descriptor, b.kind, b.key, new Map.unmodifiable(b.propertyMetadata),
         new List.unmodifiable(b.versionFields));
-  }
-
-  /// Constructs or returns a cached [EntityBridge] object based on
-  /// the type parameter [T].
-  factory EntityBridge() {
-    return new EntityBridge<T>.fromClass(T);
   }
 
   EntityBridge._(this.descriptor, this.kind, this._key, this._propertyMetadata, this._versionFields);
@@ -120,6 +120,7 @@ class EntityBridge<T> {
 
   bool keyKindMatches(Key key) => key?.kind == kind;
 
+  @override
   String toString() =>
       "EntityBridge($kind, $_key, ${_propertyMetadata.values.join(", ")})";
 

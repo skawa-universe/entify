@@ -1,5 +1,5 @@
 import "dart:typed_data";
-import "dart:convert";
+import "dart:convert" as dc;
 
 import "package:googleapis/datastore/v1.dart" as ds;
 import "package:entify/entify.dart";
@@ -16,7 +16,7 @@ const Object inputToString = const Identity("inputToString");
 
 Object base64(Object buffer) {
   if (buffer is TypedData) buffer = (buffer as TypedData).buffer;
-  return BASE64
+  return dc.base64
       .encode((buffer as ByteBuffer).asUint8List())
       .replaceAll("/", "_")
       .replaceAll("+", "-");
@@ -76,7 +76,7 @@ void testListFromValue(List<dynamic> input, {bool excludeFromIndexes}) {
   expect(fromValue(jsonValue(inputJson)), equals(input));
 }
 
-main() {
+void main() {
   test("toValue(int)", () => testToValueWith("integerValue", -1234));
   test("toValue(double)", () => testToValueWith("doubleValue", -12.34, same));
   test("toValue(bool)", () => testToValueWith("booleanValue", true, same));

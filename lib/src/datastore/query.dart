@@ -70,23 +70,23 @@ class FilterOperator {
   // meh, why have it...
   // static const operatorUnspecified = const FilterOperator._("OPERATOR_UNSPECIFIED");
   /// The filter operator will be `entity_property < value`.
-  static const lessThan = const FilterOperator._("LESS_THAN");
+  static const FilterOperator lessThan = const FilterOperator._("LESS_THAN");
   /// The filter operator will be `entity_property <= value`.
-  static const lessThanOrEqual = const FilterOperator._("LESS_THAN_OR_EQUAL");
+  static const FilterOperator lessThanOrEqual = const FilterOperator._("LESS_THAN_OR_EQUAL");
   /// The filter operator will be `entity_property > value`.
-  static const greaterThan = const FilterOperator._("GREATER_THAN");
+  static const FilterOperator greaterThan = const FilterOperator._("GREATER_THAN");
   /// The filter operator will be `entity_property >= value`.
-  static const greaterThanOrEqual =
+  static const FilterOperator greaterThanOrEqual =
       const FilterOperator._("GREATER_THAN_OR_EQUAL");
   /// The filter operator will be `entity_property == value`.
-  static const equal = const FilterOperator._("EQUAL");
+  static const FilterOperator equal = const FilterOperator._("EQUAL");
   /// The left side of this operator must be `__key__` (i.e. the filter can be only used
   /// to match the entity key), and will match if the key on the right as a key path is
   /// a prefix of the key path of the entity key.
   ///
   /// The key path means the chain from the root key down to the entity key backwards via
   /// the parent key references.
-  static const hasAncestor = const FilterOperator._("HAS_ANCESTOR");
+  static const FilterOperator hasAncestor = const FilterOperator._("HAS_ANCESTOR");
 
   static const List<FilterOperator> values = const [
     lessThan,
@@ -110,7 +110,7 @@ class FilterOperator {
 
   static FilterOperator lookup(String opName) {
     if (_opNameToOp == null) {
-      _opNameToOp = new Map.fromIterable(values, key: (FilterOperator op) => op.opName);
+      _opNameToOp = new Map<String, FilterOperator>.fromIterable(values, key: (op) => (op as FilterOperator).opName);
     }
     return _opNameToOp[opName] ?? new FilterOperator._(opName);
   }
@@ -137,8 +137,10 @@ class FilterOperator {
   ds.Filter encode(String propertyName, Object propertyValue) =>
       of(propertyName, propertyValue).toApiObject();
 
-  bool operator ==(other) => other is FilterOperator && other.opName == opName;
+  @override
+  bool operator ==(dynamic other) => other is FilterOperator && other.opName == opName;
 
+  @override
   int get hashCode => opName.hashCode;
 
   /// The internal name of the operator.
@@ -161,7 +163,7 @@ class Projection implements ApiRepresentation<ds.Projection> {
   /// properly.
   static List<Projection> fromProtocol(ds.Query query) {
     if (query.projection == null) return null;
-    Set<String> distinct = null;
+    Set<String> distinct;
     if (query.distinctOn != null && query.distinctOn.isNotEmpty) {
       distinct = query.distinctOn.map((ref) => ref.name).toSet();
     }
@@ -170,6 +172,7 @@ class Projection implements ApiRepresentation<ds.Projection> {
         distinct: distinct?.contains(p.property.name) ?? false));
   }
 
+  @override
   ds.Projection toApiObject() =>
       new ds.Projection()..property = toPropertyReference();
   ds.PropertyReference toPropertyReference() =>
@@ -186,6 +189,7 @@ class Projection implements ApiRepresentation<ds.Projection> {
 class PropertySort implements ApiRepresentation<ds.PropertyOrder> {
   const PropertySort(this.name, this.direction);
 
+  @override
   ds.PropertyOrder toApiObject() => new ds.PropertyOrder()
     ..property = (new ds.PropertyReference()..name = name)
     ..direction = direction.name;
@@ -199,16 +203,17 @@ class PropertySort implements ApiRepresentation<ds.PropertyOrder> {
 /// Specifies a sorting direction.
 class SortDirection {
   /// Sort ascending.
-  static const ascending = const SortDirection._("ASCENDING");
+  static const SortDirection ascending = const SortDirection._("ASCENDING");
   /// Sort descending.
-  static const descending = const SortDirection._("DESCENDING");
+  static const SortDirection descending = const SortDirection._("DESCENDING");
 
   static const List<SortDirection> values = const [ascending, descending];
 
   /// Look up sort direction by name.
   static SortDirection lookup(String opName) {
     if (_nameToSortDirection == null) {
-      _nameToSortDirection = new Map.fromIterable(values, key: (SortDirection dir) => dir.name);
+      _nameToSortDirection =
+          new Map<String, SortDirection>.fromIterable(values, key: (dir) => (dir as SortDirection).name);
     }
     return _nameToSortDirection[opName] ?? new SortDirection._(opName);
   }
@@ -237,8 +242,10 @@ class SortDirection {
   ds.PropertyOrder encode(String propertyName) =>
       of(propertyName).toApiObject();
 
-  bool operator ==(other) => other is SortDirection && other.name == name;
+  @override
+  bool operator ==(dynamic other) => other is SortDirection && other.name == name;
 
+  @override
   int get hashCode => name.hashCode;
 
   /// The API enum name of this sort direction.
@@ -296,6 +303,7 @@ class Query implements ApiRepresentation<ds.Query> {
   /// Sorting options to add to the query.
   List<PropertySort> sort;
 
+  @override
   ds.Query toApiObject() => new ds.Query()
     ..startCursor = startCursor
     ..endCursor = endCursor

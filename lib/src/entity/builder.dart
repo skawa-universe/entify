@@ -35,7 +35,7 @@ class EntityMetadataBuilder {
       new EntityMetadataBuilder.fromMirror(reflectClass(type));
 
   EntityMetadataBuilder.fromMirror(ClassMirror leaf) {
-    EntityModel desc = null;
+    EntityModel desc;
     for (InstanceMirror im in leaf.metadata) {
       if (im.reflectee is EntityModel) {
         desc = im.reflectee;
@@ -87,8 +87,8 @@ class EntityMetadataBuilder {
 
       if (accessor == null) continue;
 
-      String propertyName = null;
-      Persistent p = null;
+      String propertyName;
+      Persistent p;
       for (InstanceMirror im in metadata) {
         if (im.reflectee is Persistent) {
           p = im.reflectee;
@@ -108,14 +108,15 @@ class EntityMetadataBuilder {
     }
   }
 
+  @override
   String toString() => propertyMetadata.toString();
 
-  String kind = null;
+  String kind;
   final Map<String, EntityPropertyBridge> propertyMetadata = {};
 
   EntityModel descriptor;
 
-  EntityPropertyBridge key = null;
+  EntityPropertyBridge key;
 
   final List<EntityPropertyBridge> versionFields = [];
 }

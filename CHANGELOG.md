@@ -1,3 +1,7 @@
+## 0.4.0
+
+* Dart 2 support
+
 ## 0.3.0
 
 * Entity kind is checked on deserialization (but can be disabled)

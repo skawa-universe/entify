@@ -37,7 +37,7 @@ ds.Value toValue(Object obj, {bool excludeFromIndexes}) {
   if (obj is bool) return result..booleanValue = obj;
   if (obj is String) return result..stringValue = obj;
   if (obj is TypedData || obj is ByteBuffer) {
-    Uint8List bytes = null;
+    Uint8List bytes;
     if (obj is ByteBuffer) {
       bytes = obj.asUint8List();
     } else if (obj is Uint8List) {
@@ -47,7 +47,7 @@ ds.Value toValue(Object obj, {bool excludeFromIndexes}) {
       bytes =
           typed.buffer.asUint8List(typed.offsetInBytes, typed.lengthInBytes);
     }
-    return result..blobValue = BASE64.encode(bytes);
+    return result..blobValue = base64.encode(bytes);
   }
   if (obj is List) {
     result.excludeFromIndexes = null;

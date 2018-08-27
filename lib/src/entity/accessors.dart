@@ -9,7 +9,7 @@ import "errors.dart";
 abstract class PropertyAccessor {
   /// The name of this field/getter-setter pair.
   /// 
-  /// This name will be used as a default value, of the [Persistent]
+  /// This name will be used as a default value, of the `Persistent`
   /// metadata object does not override the name.
   String get name;
 

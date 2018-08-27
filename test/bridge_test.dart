@@ -6,8 +6,10 @@ import "package:test/test.dart";
 class Box<T> {
   Box(this.value);
 
+  @override
   int get hashCode => value.hashCode;
 
+  @override
   bool operator ==(dynamic other) => other is Box && other.value == value;
 
   final T value;
@@ -70,7 +72,7 @@ class NoSkipMissing {
   bool gamma = false;
 }
 
-main() {
+void main() {
   test("Basic serialization", () {
     const List<int> bytesAsList = const <int>[0, 50, 100, 150, 200, 250];
 

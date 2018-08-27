@@ -1,8 +1,11 @@
 name: entify
-version: 0.3.0
+version: 0.4.0
 author: Peter Siroki <psiroki@skawa.hu>
 description: A toolkit to ease the use of the datastore with the googleapis package.
 homepage: https://github.com/skawa-universe/entify
+
+environment:
+  sdk: '>=2.0.0 <3.0.0'
 
 dependencies:
   googleapis: ">=0.39.0 <1.0.0"
