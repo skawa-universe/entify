@@ -94,29 +94,22 @@ final Symbol _from = new Symbol("from");
 
 _ValueAdapter _createValueAdapter(TypeMirror expectedType) {
   if (expectedType == null) return null;
-  bool verbose = expectedType.reflectedType.runtimeType.toString() == "List<int>";
-  if (verbose) print("1..");
   if (expectedType is ClassMirror &&
-      expectedType.isSubclassOf(_listTypeMirror) &&
+      (expectedType.isSubclassOf(_iterableTypeMirror) ||
+          expectedType.isSubclassOf(_listTypeMirror)) &&
       !expectedType.isSubclassOf(_typedDataTypeMirror)) {
-    if (verbose) print("2..");
     Type elementType = _iterableType(expectedType);
-    if (verbose) print("3.. $elementType");
     if (elementType != null) {
       ClassMirror listType = reflectType(List, [elementType]);
-      if (verbose) print("4.. $listType");
       return (dynamic value) {
         if (value is Iterable && value is! TypedData) {
-          if (verbose) print("5.. $listType");
           return listType.newInstance(_from, [value]).reflectee;
         } else {
-          if (verbose) print("6.. ${value.runtimeType}");
           return value;
         }
       };
     }
   }
-  if (verbose) print("7..");
   return null;
 }
 

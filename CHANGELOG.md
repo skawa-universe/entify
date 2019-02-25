@@ -1,3 +1,7 @@
+## 0.4.0+1
+
+* Collection type adaptation fix
+
 ## 0.4.0
 
 * Dart 2 support
