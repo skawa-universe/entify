@@ -76,7 +76,9 @@ class EntityModel {
   /// [kind] is set to `null` (or is omitted) the kind will be the entity model
   /// class name.
   const EntityModel(
-      {this.kind, this.skipMissingProperties = false, this.checkKeyKind = true});
+      {this.kind,
+      this.skipMissingProperties = false,
+      this.checkKeyKind = true});
 
   final String kind;
   final bool skipMissingProperties;
