@@ -27,13 +27,15 @@ abstract class PropertyAccessor {
 /// Provides unified access to object fields.
 class FieldPropertyAccessor implements PropertyAccessor {
   /// Constructs the accessor based on a [VariableMirror] instance.
-  FieldPropertyAccessor(this._variable) : _setValueAdapter = _createValueAdapter(_variable.type);
+  FieldPropertyAccessor(this._variable)
+      : _setValueAdapter = _createValueAdapter(_variable.type);
 
   @override
   String get name => MirrorSystem.getName(_variable.simpleName);
 
   @override
-  bool acceptsType(Type type) => reflectType(type).isAssignableTo(_variable.type);
+  bool acceptsType(Type type) =>
+      reflectType(type).isAssignableTo(_variable.type);
 
   @override
   void setValue(InstanceMirror object, dynamic value) {
@@ -42,7 +44,8 @@ class FieldPropertyAccessor implements PropertyAccessor {
   }
 
   @override
-  dynamic getValue(InstanceMirror object) => object.getField(_variable.simpleName).reflectee;
+  dynamic getValue(InstanceMirror object) =>
+      object.getField(_variable.simpleName).reflectee;
 
   final VariableMirror _variable;
   final _ValueAdapter _setValueAdapter;
@@ -54,10 +57,15 @@ class MethodPropertyAccessor implements PropertyAccessor {
   ///
   /// The parameters can be provided in any order the constructor detects
   /// which one is which.
-  MethodPropertyAccessor(MethodMirror getterOrSetter, [MethodMirror setterOrGetter])
+  MethodPropertyAccessor(MethodMirror getterOrSetter,
+      [MethodMirror setterOrGetter])
       : _getter = _getterOf(getterOrSetter, setterOrGetter),
         _setter = _setterOf(getterOrSetter, setterOrGetter),
-        _setValueAdapter = _createValueAdapter((_setterOf(getterOrSetter, setterOrGetter))?.parameters?.first?.type) {
+        _setValueAdapter = _createValueAdapter(
+            (_setterOf(getterOrSetter, setterOrGetter))
+                ?.parameters
+                ?.first
+                ?.type) {
     if (!_getter.isGetter) throw new EntityModelError("No getter was given");
   }
 
@@ -76,9 +84,11 @@ class MethodPropertyAccessor implements PropertyAccessor {
   }
 
   @override
-  dynamic getValue(InstanceMirror object) => object.getField(_getter.simpleName).reflectee;
+  dynamic getValue(InstanceMirror object) =>
+      object.getField(_getter.simpleName).reflectee;
 
-  TypeMirror get _typeMirror => _setter != null ? _setter.parameters[0].type : _getter.returnType;
+  TypeMirror get _typeMirror =>
+      _setter != null ? _setter.parameters[0].type : _getter.returnType;
 
   final MethodMirror _setter;
   final MethodMirror _getter;
@@ -115,7 +125,8 @@ _ValueAdapter _createValueAdapter(TypeMirror expectedType) {
 
 Type _iterableType(TypeMirror type) {
   if (type is ClassMirror) {
-    if (type.isSubclassOf(_iterableTypeMirror) && type.typeArguments.length == 1) {
+    if (type.isSubclassOf(_iterableTypeMirror) &&
+        type.typeArguments.length == 1) {
       return type.typeArguments.first.reflectedType;
     }
     Type result = _iterableType(type.superclass);
@@ -128,8 +139,10 @@ Type _iterableType(TypeMirror type) {
   return null;
 }
 
-MethodMirror _setterOf(MethodMirror getterOrSetter, MethodMirror setterOrGetter) =>
+MethodMirror _setterOf(
+        MethodMirror getterOrSetter, MethodMirror setterOrGetter) =>
     getterOrSetter.isSetter ? getterOrSetter : setterOrGetter;
 
-MethodMirror _getterOf(MethodMirror getterOrSetter, MethodMirror setterOrGetter) =>
+MethodMirror _getterOf(
+        MethodMirror getterOrSetter, MethodMirror setterOrGetter) =>
     getterOrSetter.isGetter ? getterOrSetter : setterOrGetter;

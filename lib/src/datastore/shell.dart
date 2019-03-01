@@ -15,7 +15,8 @@ class DatastoreShell {
   factory DatastoreShell(ds.DatastoreApi api, String project) =>
       new DatastoreShell._(api, project, transactionId: null, rootShell: null);
 
-  DatastoreShell._(this.api, this.project, {String transactionId, DatastoreShell rootShell})
+  DatastoreShell._(this.api, this.project,
+      {String transactionId, DatastoreShell rootShell})
       : this._rootShell = rootShell,
         this.transactionId = transactionId,
         _activeTransaction = transactionId != null;
@@ -26,18 +27,26 @@ class DatastoreShell {
   /// The transaction can be committed by running a (possibly empty) mutation
   Future<DatastoreShell> beginTransaction() {
     ds.BeginTransactionRequest request = new ds.BeginTransactionRequest();
-    return api.projects.beginTransaction(request, project).then((ds.BeginTransactionResponse response) {
-      if (response.transaction == null) throw new DatastoreShellError("Expected a transaction");
-      return new DatastoreShell._(api, project, transactionId: response.transaction, rootShell: nonTransactionalShell);
+    return api.projects
+        .beginTransaction(request, project)
+        .then((ds.BeginTransactionResponse response) {
+      if (response.transaction == null)
+        throw new DatastoreShellError("Expected a transaction");
+      return new DatastoreShell._(api, project,
+          transactionId: response.transaction,
+          rootShell: nonTransactionalShell);
     });
   }
 
   Future<Null> rollback() {
-    if (!isTransactional) throw new DatastoreShellError("No active transaction");
+    if (!isTransactional)
+      throw new DatastoreShellError("No active transaction");
     ds.RollbackRequest request = new ds.RollbackRequest();
     request.transaction = transactionId;
     _activeTransaction = false;
-    return api.projects.rollback(request, project).then((ds.RollbackResponse response) => null);
+    return api.projects
+        .rollback(request, project)
+        .then((ds.RollbackResponse response) => null);
   }
 
   /// Prepares a query. Currently it's not much more than a simple wrapper, later
@@ -49,8 +58,10 @@ class DatastoreShell {
   /// Retrieves a single entity by key. Throws (asynchronously)
   /// [EntityNotFoundError] if the entity does not exist.
   Future<Entity> getSingle(Key key, {ReadConsistency readConsistency}) {
-    return getRaw([key], readConsistency: readConsistency).then((ds.LookupResponse resp) {
-      if ((resp.deferred?.length ?? 0) > 0) throw new DatastoreShellError("Entity lookup deferred");
+    return getRaw([key], readConsistency: readConsistency)
+        .then((ds.LookupResponse resp) {
+      if ((resp.deferred?.length ?? 0) > 0)
+        throw new DatastoreShellError("Entity lookup deferred");
       if ((resp.missing?.length ?? 0) > 0) throw new EntityNotFoundError(key);
       return new Entity.fromEntityResult(resp.found[0]);
     });
@@ -58,26 +69,34 @@ class DatastoreShell {
 
   /// Retrieves multiple entities by their keys. The resulting map contains
   /// all existing entities, but no entries for the non-existing ones.
-  Future<Map<Key, Entity>> getAll(Iterable<Key> keys, {ReadConsistency readConsistency}) {
-    return getRaw(keys, readConsistency: readConsistency).then((ds.LookupResponse resp) async {
+  Future<Map<Key, Entity>> getAll(Iterable<Key> keys,
+      {ReadConsistency readConsistency}) {
+    return getRaw(keys, readConsistency: readConsistency)
+        .then((ds.LookupResponse resp) async {
       List<ds.EntityResult> found = resp.found ?? [];
       while (resp.deferred?.isNotEmpty ?? false) {
         if (resp.found?.isEmpty ?? true) {
-          throw new DatastoreShellError("Entity lookup deferred, but not a single one more returned: ${resp.deferred}");
+          throw new DatastoreShellError(
+              "Entity lookup deferred, but not a single one more returned: ${resp.deferred}");
         }
-        resp = await getRawKeys(resp.deferred, readConsistency: readConsistency);
+        resp =
+            await getRawKeys(resp.deferred, readConsistency: readConsistency);
         if (resp.found != null) found.addAll(resp.found);
       }
-      return new Map.fromIterable((found ?? const []).map((item) => new Entity.fromEntityResult(item)),
+      return new Map.fromIterable(
+          (found ?? const []).map((item) => new Entity.fromEntityResult(item)),
           key: (e) => e.key);
     });
   }
 
   /// Starts a lookup for a list of keys and returns with the raw API response.
-  Future<ds.LookupResponse> getRaw(Iterable<Key> keys, {ReadConsistency readConsistency}) =>
-      getRawKeys(keys.map(ApiRepresentation.mapToApi).toList(growable: false), readConsistency: readConsistency);
+  Future<ds.LookupResponse> getRaw(Iterable<Key> keys,
+          {ReadConsistency readConsistency}) =>
+      getRawKeys(keys.map(ApiRepresentation.mapToApi).toList(growable: false),
+          readConsistency: readConsistency);
 
-  Future<ds.LookupResponse> getRawKeys(Iterable<ds.Key> rawKeys, {ReadConsistency readConsistency}) {
+  Future<ds.LookupResponse> getRawKeys(Iterable<ds.Key> rawKeys,
+      {ReadConsistency readConsistency}) {
     ds.LookupRequest lr = new ds.LookupRequest();
     lr.keys = rawKeys;
     lr.readOptions = new ds.ReadOptions();
@@ -88,12 +107,14 @@ class DatastoreShell {
     }, test: (e) => e is ds.DetailedApiRequestError);
   }
 
-  Future<T> runTransaction<T>(Future<T> transactionBody(DatastoreShell transactionShell),
-      {int retryCount: 16,
-      Duration firstRetryDuration: const Duration(milliseconds: 10),
-      bool delayOnConflict: false,
-      bool backDownOnConflict: false,
-      Duration stepDownRetryDuration(Duration previousDuration): defaultExponentialStepDown,
+  Future<T> runTransaction<T>(
+      Future<T> transactionBody(DatastoreShell transactionShell),
+      {int retryCount = 16,
+      Duration firstRetryDuration = const Duration(milliseconds: 10),
+      bool delayOnConflict = false,
+      bool backDownOnConflict = false,
+      Duration stepDownRetryDuration(Duration previousDuration) =
+          defaultExponentialStepDown,
       void errorCallback(WrappedServerError error)}) async {
     WrappedServerError lastError;
     Duration nextRetryDuration = firstRetryDuration;
@@ -111,7 +132,8 @@ class DatastoreShell {
         if (errorCallback != null) errorCallback(e);
         if (delayOnConflict) {
           await new Future.delayed(nextRetryDuration, () => null);
-          if (backDownOnConflict) nextRetryDuration = stepDownRetryDuration(nextRetryDuration);
+          if (backDownOnConflict)
+            nextRetryDuration = stepDownRetryDuration(nextRetryDuration);
         }
       } on DatastoreTransientError catch (e) {
         lastError = e;
@@ -126,7 +148,8 @@ class DatastoreShell {
   }
 
   static Duration defaultExponentialStepDown(Duration previousDuration) {
-    if (previousDuration.compareTo(const Duration(seconds: 10)) >= 0) return previousDuration;
+    if (previousDuration.compareTo(const Duration(seconds: 10)) >= 0)
+      return previousDuration;
     return previousDuration * 2;
   }
 
@@ -138,14 +161,16 @@ class DatastoreShell {
               : "The transaction ran into a conflict",
           error);
     } else if (error.status == 500) {
-      throw new DatastoreTransientError(error.message ?? "A transient error has occured", error);
+      throw new DatastoreTransientError(
+          error.message ?? "A transient error has occured", error);
     } else {
       throw new UnknownDatastoreError(error.message, error);
     }
   }
 
   /// Starts a mutation batch.
-  MutationBatch beginMutation() => new MutationBatch(this, onCommit: (_) => _activeTransaction = false);
+  MutationBatch beginMutation() =>
+      new MutationBatch(this, onCommit: (_) => _activeTransaction = false);
 
   /// The underlying API object.
   final ds.DatastoreApi api;
@@ -163,11 +188,13 @@ class DatastoreShell {
   bool _activeTransaction;
 
   /// The non-transactional shell instance.
-  DatastoreShell get nonTransactionalShell => _rootShell ?? (transactionId == null ? this : null);
+  DatastoreShell get nonTransactionalShell =>
+      _rootShell ?? (transactionId == null ? this : null);
 }
 
 abstract class QueryResult<T> {
-  factory QueryResult(Iterable<T> entities, String endCursor) => new GenericQueryResult(entities, endCursor);
+  factory QueryResult(Iterable<T> entities, String endCursor) =>
+      new GenericQueryResult(entities, endCursor);
 
   Iterable<T> get entities;
   String get endCursor;
@@ -217,8 +244,8 @@ class PreparedQuery {
   PreparedQuery._(this.shell, Query query) : this.query = query.toApiObject();
 
   /// Runs the query and returns the resulting batch.
-  Future<QueryResultBatch> runQuery() =>
-      runRawQuery().then((ds.RunQueryResponse response) => new QueryResultBatch(shell, response));
+  Future<QueryResultBatch> runQuery() => runRawQuery().then(
+      (ds.RunQueryResponse response) => new QueryResultBatch(shell, response));
 
   /// Runs the query and returns the raw API response.
   Future<ds.RunQueryResponse> runRawQuery() {

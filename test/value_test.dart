@@ -138,7 +138,8 @@ void main() {
       expect(values.length, 3);
       for (int i = 0; i < excludes.length; ++i) {
         expect(values[i].excludeFromIndexes, excludes[i]);
-        expect(values[i].toJson(), toValue(sample[i], excludeFromIndexes: excludes[i]).toJson());
+        expect(values[i].toJson(),
+            toValue(sample[i], excludeFromIndexes: excludes[i]).toJson());
       }
     }
   });

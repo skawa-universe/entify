@@ -14,10 +14,10 @@ class EntityPropertyBridge {
   String toString() => metadata == null
       ? "${name} <=> ${accessor.name}"
       : metadata.indexed
-        ? (metadata.indexedIfNonNull
-            ? "${name} <=> unindexedNull(${accessor.name})"
-            : "${name} <=> ${accessor.name}")
-        : "${name} <=> unindexed(${accessor.name})";
+          ? (metadata.indexedIfNonNull
+              ? "${name} <=> unindexedNull(${accessor.name})"
+              : "${name} <=> ${accessor.name}")
+          : "${name} <=> unindexed(${accessor.name})";
 
   /// The entity property name.
   final String name;

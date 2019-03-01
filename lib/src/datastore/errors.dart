@@ -30,13 +30,19 @@ class WrappedServerError extends DatastoreShellError {
 }
 
 class DatastoreConflictError extends WrappedServerError {
-  DatastoreConflictError(String message, ds.DetailedApiRequestError originalError) : super(message, originalError);
+  DatastoreConflictError(
+      String message, ds.DetailedApiRequestError originalError)
+      : super(message, originalError);
 }
 
 class DatastoreTransientError extends WrappedServerError {
-  DatastoreTransientError(String message, ds.DetailedApiRequestError originalError) : super(message, originalError);
+  DatastoreTransientError(
+      String message, ds.DetailedApiRequestError originalError)
+      : super(message, originalError);
 }
 
 class UnknownDatastoreError extends WrappedServerError {
-  UnknownDatastoreError(String message, ds.DetailedApiRequestError originalError) : super(message, originalError);
+  UnknownDatastoreError(
+      String message, ds.DetailedApiRequestError originalError)
+      : super(message, originalError);
 }

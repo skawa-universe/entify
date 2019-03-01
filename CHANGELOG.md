@@ -1,3 +1,7 @@
+## 0.4.0+2
+
+* Added an example, fixed linter warnings
+
 ## 0.4.0+1
 
 * Collection type adaptation fix

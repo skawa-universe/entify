@@ -1,4 +1,3 @@
-
 /// Thrown when there was an error during entity
 /// model metadata extraction or during entity
 /// property mapping.

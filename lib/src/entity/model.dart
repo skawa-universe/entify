@@ -37,11 +37,16 @@ class EntityBridge<T> {
   /// should do every time.
   factory EntityBridge.uniqueFromClass(Type type) {
     EntityMetadataBuilder b = new EntityMetadataBuilder.fromClass(type);
-    return new EntityBridge._(b.descriptor, b.kind, b.key, new Map.unmodifiable(b.propertyMetadata),
+    return new EntityBridge._(
+        b.descriptor,
+        b.kind,
+        b.key,
+        new Map.unmodifiable(b.propertyMetadata),
         new List.unmodifiable(b.versionFields));
   }
 
-  EntityBridge._(this.descriptor, this.kind, this._key, this._propertyMetadata, this._versionFields);
+  EntityBridge._(this.descriptor, this.kind, this._key, this._propertyMetadata,
+      this._versionFields);
 
   Key createKey({String name, int id, Key parent}) =>
       new Key(kind, name: name, id: id, parent: parent);
@@ -70,7 +75,8 @@ class EntityBridge<T> {
       // flatten/duplicate iterables so there's no strange changes in lists
       if (value is! TypedData && value is Iterable) value = value.toList();
       if (value is Key && !value.isComplete)
-        throw new EntityModelError("Value of ${prop.name} is an incomplete key: $value!");
+        throw new EntityModelError(
+            "Value of ${prop.name} is an incomplete key: $value!");
       final bool indexed = prop.metadata.indexed &&
           (!prop.metadata.indexedIfNonNull || value != null);
       result.setValue(prop.name, value, indexed: indexed);
@@ -87,7 +93,8 @@ class EntityBridge<T> {
     PropertyAccessor keyAccessor = _key.accessor;
     bool defaultSkip = descriptor.skipMissingProperties ?? false;
     if ((descriptor.checkKeyKind ?? true) && key != null && key.kind != kind)
-      throw new ArgumentError.value(key.kind, "source.key.kind", "is not $kind");
+      throw new ArgumentError.value(
+          key.kind, "source.key.kind", "is not $kind");
     if (keyAccessor.acceptsType(Key)) {
       keyAccessor.setValue(im, key);
     } else if (key?.isComplete ?? false) {
@@ -98,12 +105,14 @@ class EntityBridge<T> {
       }
     }
     for (EntityPropertyBridge prop in _versionFields) {
-      if (!(prop.metadata?.skipIfMissing ?? defaultSkip) || source.version != null) {
+      if (!(prop.metadata?.skipIfMissing ?? defaultSkip) ||
+          source.version != null) {
         prop.accessor.setValue(im, source.version);
       }
     }
     for (EntityPropertyBridge prop in _propertyMetadata.values) {
-      if (!(prop.metadata?.skipIfMissing ?? defaultSkip) || source.containsProperty(prop.name)) {
+      if (!(prop.metadata?.skipIfMissing ?? defaultSkip) ||
+          source.containsProperty(prop.name)) {
         prop.accessor.setValue(im, source[prop.name]);
       }
     }
@@ -122,6 +131,7 @@ class EntityBridge<T> {
       "EntityBridge($kind, $_key, ${_propertyMetadata.values.join(", ")})";
 
   final EntityModel descriptor;
+
   /// The kind this [EntityBridge] instance represents.
   final String kind;
   final EntityPropertyBridge _key;

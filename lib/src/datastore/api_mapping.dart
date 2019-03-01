@@ -1,4 +1,3 @@
-
 /// Every class in entify that can be represented with a `package:googleapis` object
 /// implement this interface.
 abstract class ApiRepresentation<T> {

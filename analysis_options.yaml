@@ -42,5 +42,6 @@ linter:
   - type_annotate_public_apis
   - type_init_formals
   - unnecessary_getters_setters
+  - prefer_equal_for_default_values
 
   - package_names

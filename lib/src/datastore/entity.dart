@@ -57,17 +57,25 @@ class Entity implements ApiRepresentation<ds.Entity> {
   /// An incomplete key is a key that has a kind, but no id or name. When an
   /// entity like this is inserted into the Datastore, an id is automatically
   /// generated for it.
-  Entity.ofKind(String kind) : key = new Key(kind), version = null;
+  Entity.ofKind(String kind)
+      : key = new Key(kind),
+        version = null;
 
   /// Creates an entity from a `package:googleapis` object.
-  factory Entity.fromApiObject(ds.Entity entity) => new Entity._fromApiObject(entity);
+  factory Entity.fromApiObject(ds.Entity entity) =>
+      new Entity._fromApiObject(entity);
 
   /// Creates an entity from a `package:googleapis` `EntityResult` object, so the
   /// version field is filled.
-  factory Entity.fromEntityResult(ds.EntityResult result) => new Entity._fromApiObject(result.entity,
-      version: result.version != null ? int.parse(result.version, radix: 10) : result.version);
+  factory Entity.fromEntityResult(ds.EntityResult result) =>
+      new Entity._fromApiObject(result.entity,
+          version: result.version != null
+              ? int.parse(result.version, radix: 10)
+              : result.version);
 
-  Entity.copy(Entity other, {bool deepCopy: true}): key = other.key, version = other.version {
+  Entity.copy(Entity other, {bool deepCopy = true})
+      : key = other.key,
+        version = other.version {
     setPropertiesFrom(other, deepCopyValues: deepCopy);
   }
 
@@ -83,13 +91,17 @@ class Entity implements ApiRepresentation<ds.Entity> {
           throw new DatastoreShellError("Field $name: ${e.message}");
         }
       }));
-      _unindexedProperties.addAll(
-          values.keys.where((name) => values[name].excludeFromIndexes ?? false));
+      _unindexedProperties.addAll(values.keys
+          .where((name) => values[name].excludeFromIndexes ?? false));
     }
   }
 
   @override
-  String toString() => {"key": key, "properties": _properties, "unindexed": _unindexedProperties}.toString();
+  String toString() => {
+        "key": key,
+        "properties": _properties,
+        "unindexed": _unindexedProperties
+      }.toString();
 
   /// Creates a `package:googleapis` object representation of this entity.
   @override
@@ -107,7 +119,7 @@ class Entity implements ApiRepresentation<ds.Entity> {
 
   /// Sets the property named [name] to the value [value] and makes it (un)[indexed]
   /// (default is indexed).
-  void setValue(String name, Object value, {bool indexed: true}) {
+  void setValue(String name, Object value, {bool indexed = true}) {
     if (value is IndexedOverride) {
       IndexedOverride override = value;
       indexed = override.indexed;
@@ -118,7 +130,7 @@ class Entity implements ApiRepresentation<ds.Entity> {
   }
 
   /// Overrides whether the property named [name] should be indexed.
-  void setIndexed(String name, {bool indexed: true}) {
+  void setIndexed(String name, {bool indexed = true}) {
     if (_properties.containsKey(name)) {
       if (indexed)
         _unindexedProperties.remove(name);
@@ -145,7 +157,7 @@ class Entity implements ApiRepresentation<ds.Entity> {
     _unindexedProperties.clear();
   }
 
-  void setPropertiesFrom(Entity other, {bool deepCopyValues: false}) {
+  void setPropertiesFrom(Entity other, {bool deepCopyValues = false}) {
     _unindexedProperties.removeAll(other._properties.keys);
     _unindexedProperties.addAll(other._unindexedProperties);
     if (deepCopyValues) {
@@ -159,7 +171,6 @@ class Entity implements ApiRepresentation<ds.Entity> {
       _properties.addAll(other._properties);
     }
   }
-
 
   Iterable<String> get propertyNames => _properties.keys;
 

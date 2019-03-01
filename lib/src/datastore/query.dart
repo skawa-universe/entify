@@ -60,8 +60,10 @@ class PropertyFilterPredicate implements FilterPredicate {
 
   /// The name of the property that must match.
   final String name;
+
   /// The filter operator to use for matching.
   final FilterOperator op;
+
   /// The value the property must match.
   final Object value;
 }
@@ -71,22 +73,30 @@ class FilterOperator {
   // static const operatorUnspecified = const FilterOperator._("OPERATOR_UNSPECIFIED");
   /// The filter operator will be `entity_property < value`.
   static const FilterOperator lessThan = const FilterOperator._("LESS_THAN");
+
   /// The filter operator will be `entity_property <= value`.
-  static const FilterOperator lessThanOrEqual = const FilterOperator._("LESS_THAN_OR_EQUAL");
+  static const FilterOperator lessThanOrEqual =
+      const FilterOperator._("LESS_THAN_OR_EQUAL");
+
   /// The filter operator will be `entity_property > value`.
-  static const FilterOperator greaterThan = const FilterOperator._("GREATER_THAN");
+  static const FilterOperator greaterThan =
+      const FilterOperator._("GREATER_THAN");
+
   /// The filter operator will be `entity_property >= value`.
   static const FilterOperator greaterThanOrEqual =
       const FilterOperator._("GREATER_THAN_OR_EQUAL");
+
   /// The filter operator will be `entity_property == value`.
   static const FilterOperator equal = const FilterOperator._("EQUAL");
+
   /// The left side of this operator must be `__key__` (i.e. the filter can be only used
   /// to match the entity key), and will match if the key on the right as a key path is
   /// a prefix of the key path of the entity key.
   ///
   /// The key path means the chain from the root key down to the entity key backwards via
   /// the parent key references.
-  static const FilterOperator hasAncestor = const FilterOperator._("HAS_ANCESTOR");
+  static const FilterOperator hasAncestor =
+      const FilterOperator._("HAS_ANCESTOR");
 
   static const List<FilterOperator> values = const [
     lessThan,
@@ -105,12 +115,12 @@ class FilterOperator {
   /// The already existing contants will not be recreated via this
   /// constructor, however it will return a unique object every time
   /// if it is used with a currently unknown operator.
-  factory FilterOperator.custom(String opName) =>
-    lookup(opName);
+  factory FilterOperator.custom(String opName) => lookup(opName);
 
   static FilterOperator lookup(String opName) {
     if (_opNameToOp == null) {
-      _opNameToOp = new Map<String, FilterOperator>.fromIterable(values, key: (op) => (op as FilterOperator).opName);
+      _opNameToOp = new Map<String, FilterOperator>.fromIterable(values,
+          key: (op) => (op as FilterOperator).opName);
     }
     return _opNameToOp[opName] ?? new FilterOperator._(opName);
   }
@@ -123,6 +133,7 @@ class FilterOperator {
   ///     FilterOperator.equal("foo", 5)
   PropertyFilterPredicate call(String propertyName, Object propertyValue) =>
       of(propertyName, propertyValue);
+
   /// Convenience method to create a [PropertyFilterPredicate] with the given
   /// [propertyName] and the [propertyValue] to be matched.
   ///
@@ -138,7 +149,8 @@ class FilterOperator {
       of(propertyName, propertyValue).toApiObject();
 
   @override
-  bool operator ==(dynamic other) => other is FilterOperator && other.opName == opName;
+  bool operator ==(dynamic other) =>
+      other is FilterOperator && other.opName == opName;
 
   @override
   int get hashCode => opName.hashCode;
@@ -154,7 +166,7 @@ class Projection implements ApiRepresentation<ds.Projection> {
   /// Creates a projection on the property named [propertyName],
   /// and distinct values will be returned if [distinct] is set
   /// to `true`.
-  const Projection(this.propertyName, {this.distinct: false});
+  const Projection(this.propertyName, {this.distinct = false});
 
   /// Extracts the list of projections from the API level query object.
   ///
@@ -180,6 +192,7 @@ class Projection implements ApiRepresentation<ds.Projection> {
 
   /// The name of the property on which the projection should be made.
   final String propertyName;
+
   /// Set to true whether the query should return distinct results based
   /// on this property.
   final bool distinct;
@@ -196,6 +209,7 @@ class PropertySort implements ApiRepresentation<ds.PropertyOrder> {
 
   /// The direction the sort.
   final SortDirection direction;
+
   /// The name of the property that should be sorted on.
   final String name;
 }
@@ -204,6 +218,7 @@ class PropertySort implements ApiRepresentation<ds.PropertyOrder> {
 class SortDirection {
   /// Sort ascending.
   static const SortDirection ascending = const SortDirection._("ASCENDING");
+
   /// Sort descending.
   static const SortDirection descending = const SortDirection._("DESCENDING");
 
@@ -212,8 +227,8 @@ class SortDirection {
   /// Look up sort direction by name.
   static SortDirection lookup(String opName) {
     if (_nameToSortDirection == null) {
-      _nameToSortDirection =
-          new Map<String, SortDirection>.fromIterable(values, key: (dir) => (dir as SortDirection).name);
+      _nameToSortDirection = new Map<String, SortDirection>.fromIterable(values,
+          key: (dir) => (dir as SortDirection).name);
     }
     return _nameToSortDirection[opName] ?? new SortDirection._(opName);
   }
@@ -243,7 +258,8 @@ class SortDirection {
       of(propertyName).toApiObject();
 
   @override
-  bool operator ==(dynamic other) => other is SortDirection && other.name == name;
+  bool operator ==(dynamic other) =>
+      other is SortDirection && other.name == name;
 
   @override
   int get hashCode => name.hashCode;

@@ -11,8 +11,8 @@ class ReadConsistency {
   /// Look up read consistency by name.
   static ReadConsistency lookup(String name) {
     if (_nameToValue == null) {
-      _nameToValue =
-          new Map<String, ReadConsistency>.fromIterable(values, key: (value) => (value as ReadConsistency).name);
+      _nameToValue = new Map<String, ReadConsistency>.fromIterable(values,
+          key: (value) => (value as ReadConsistency).name);
     }
     return _nameToValue[name] ?? new ReadConsistency._(name);
   }

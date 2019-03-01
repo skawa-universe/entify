@@ -88,7 +88,8 @@ void main() {
     expect(e.key.kind, equals("TestKind"), reason: "Key kind is correct");
     expect(e.key.id, equals(12345), reason: "Key id is correct");
     expect(e.key.name, isNull, reason: "Key name is unspecified");
-    expect(e.indexed["name"], "foo", reason: "Indexed property exists and indexed");
+    expect(e.indexed["name"], "foo",
+        reason: "Indexed property exists and indexed");
     expect(e.unindexed["renamed"], "Nowhere");
     expect(e.unindexed["unbox"], "bar");
     expect(e.unindexed["bytes"], equals(bytesAsList));
@@ -110,7 +111,8 @@ void main() {
     tcb.fromEntity(e, tc);
 
     expect(tc.key, equals(456), reason: "Key id is correct");
-    expect(tc.name, "Henry Fanshaw", reason: "Indexed property exists and indexed");
+    expect(tc.name, "Henry Fanshaw",
+        reason: "Indexed property exists and indexed");
     expect(tc.address, "Somewhere");
     expect(tc.box, new Box("pub"));
     expect(tc.bytes, equals(bytesAsList));
@@ -121,7 +123,7 @@ void main() {
       new EntityBridge();
     }, throwsArgumentError);
 
-    expect((){
+    expect(() {
       new EntityBridge<TestClass>();
     }, isNot(throwsA(anything)));
   });
@@ -134,7 +136,8 @@ void main() {
     Entity e = new Entity();
     e.indexed["alpha"] = 7;
     EntityBridge<SkipMissing> bridge = new EntityBridge<SkipMissing>();
-    EntityBridge<NoSkipMissing> nonSkippingBridge = new EntityBridge<NoSkipMissing>();
+    EntityBridge<NoSkipMissing> nonSkippingBridge =
+        new EntityBridge<NoSkipMissing>();
     bridge.fromEntity(e, sm);
     nonSkippingBridge.fromEntity(e, nsm);
     expect(sm.key, 3);
