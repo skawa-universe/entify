@@ -53,7 +53,8 @@ class DatastoreShell {
   /// it may emulate running multiple queries at once and merging their responses.
   ///
   /// Only ancestor queries can be run in a transaction.
-  PreparedQuery prepareQuery(Query query) => new PreparedQuery._(this, query);
+  PreparedQuery prepareQuery(Query query, {String namespace}) =>
+      new PreparedQuery._(this, query, namespace);
 
   /// Retrieves a single entity by key. Throws (asynchronously)
   /// [EntityNotFoundError] if the entity does not exist.
@@ -239,9 +240,9 @@ class QueryResultBatch implements QueryResult<Entity> {
 
 /// Contains methods for fetching and returning entities from a [Query].
 class PreparedQuery {
-  PreparedQuery._fromProtocol(this.shell, this.query);
-
-  PreparedQuery._(this.shell, Query query) : this.query = query.toApiObject();
+  PreparedQuery._(this.shell, Query query, String namespace)
+      : this.query = query.toApiObject(),
+        this.namespace = namespace ?? Namespace.currentName;
 
   /// Runs the query and returns the resulting batch.
   Future<QueryResultBatch> runQuery() => runRawQuery().then(
@@ -251,6 +252,7 @@ class PreparedQuery {
   Future<ds.RunQueryResponse> runRawQuery() {
     ds.RunQueryRequest qr = new ds.RunQueryRequest();
     qr.query = query;
+    if (namespace != null) qr.partitionId = new ds.PartitionId()..namespaceId = namespace;
     qr.readOptions = new ds.ReadOptions();
     qr.readOptions.readConsistency = null;
     if (shell.isTransactional) {
@@ -261,4 +263,5 @@ class PreparedQuery {
 
   final DatastoreShell shell;
   final ds.Query query;
+  final String namespace;
 }

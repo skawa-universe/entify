@@ -287,8 +287,10 @@ class Query implements ApiRepresentation<ds.Query> {
     ..startCursor = query.startCursor
     ..endCursor = query.endCursor
     ..projection = Projection.fromProtocol(query)
-    ..sort = query.order?.map((order) => new PropertySort(
-        order.property.name, SortDirection.lookup(order.direction)));
+    ..sort = query.order
+        ?.map((order) => new PropertySort(
+            order.property.name, SortDirection.lookup(order.direction)))
+        ?.toList();
 
   /// The kind on which the query is going to be performed.
   ///
