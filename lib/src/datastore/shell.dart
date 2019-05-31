@@ -249,16 +249,20 @@ class PreparedQuery {
       (ds.RunQueryResponse response) => new QueryResultBatch(shell, response));
 
   /// Runs the query and returns the raw API response.
-  Future<ds.RunQueryResponse> runRawQuery() {
+  Future<ds.RunQueryResponse> runRawQuery() =>
+      shell.api.projects.runQuery(createQueryRequest(), shell.project);
+
+  ds.RunQueryRequest createQueryRequest() {
     ds.RunQueryRequest qr = new ds.RunQueryRequest();
     qr.query = query;
-    if (namespace != null) qr.partitionId = new ds.PartitionId()..namespaceId = namespace;
+    if (namespace != null)
+      qr.partitionId = new ds.PartitionId()..namespaceId = namespace;
     qr.readOptions = new ds.ReadOptions();
     qr.readOptions.readConsistency = null;
     if (shell.isTransactional) {
       qr.readOptions..transaction = shell.transactionId;
     }
-    return shell.api.projects.runQuery(qr, shell.project);
+    return qr;
   }
 
   final DatastoreShell shell;
