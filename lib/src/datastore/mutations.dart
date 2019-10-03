@@ -13,6 +13,12 @@ class MutationBatch {
   MutationBatch(this.shell, {CommitCallback onCommit})
       : _commitCallback = onCommit;
 
+  /// Returns whether the batch contains no mutations
+  bool get isEmpty => mutations.isEmpty;
+
+  /// Returns whether the batch contains any mutations
+  bool get isNotEmpty => mutations.isNotEmpty;
+
   /// Adds an `insert` mutation to this batch.
   ///
   /// The given entity will be added to the datastore if an entity with the
