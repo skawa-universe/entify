@@ -14,12 +14,10 @@ class PropertyOutlet {
   PropertyOutlet._(this.parent, this.indexed);
 
   /// Returns the given property depending on whether it's (un)indexed or not.
-  Object operator [](String name) =>
-      parent.isIndexed(name) == indexed ? parent._properties[name] : null;
+  Object operator [](String name) => parent.isIndexed(name) == indexed ? parent._properties[name] : null;
 
   /// Sets a property with the specified indexed value.
-  void operator []=(String name, Object value) =>
-      parent.setValue(name, value, indexed: indexed);
+  void operator []=(String name, Object value) => parent.setValue(name, value, indexed: indexed);
 
   /// Merges the whole map of properties in [values] and sets the `indexed`
   /// property uniformly for these properties.
@@ -62,16 +60,12 @@ class Entity implements ApiRepresentation<ds.Entity> {
         version = null;
 
   /// Creates an entity from a `package:googleapis` object.
-  factory Entity.fromApiObject(ds.Entity entity) =>
-      new Entity._fromApiObject(entity);
+  factory Entity.fromApiObject(ds.Entity entity) => new Entity._fromApiObject(entity);
 
   /// Creates an entity from a `package:googleapis` `EntityResult` object, so the
   /// version field is filled.
-  factory Entity.fromEntityResult(ds.EntityResult result) =>
-      new Entity._fromApiObject(result.entity,
-          version: result.version != null
-              ? int.parse(result.version, radix: 10)
-              : result.version);
+  factory Entity.fromEntityResult(ds.EntityResult result) => new Entity._fromApiObject(result.entity,
+      version: result.version != null ? int.parse(result.version, radix: 10) : result.version);
 
   Entity.copy(Entity other, {bool deepCopy = true})
       : key = other.key,
@@ -91,17 +85,19 @@ class Entity implements ApiRepresentation<ds.Entity> {
           throw new DatastoreShellError("Field $name: ${e.message}");
         }
       }));
-      _unindexedProperties.addAll(values.keys
-          .where((name) => values[name].excludeFromIndexes ?? false));
+      _unindexedProperties.addAll(values.keys.where((name) {
+        ds.Value value = values[name];
+        bool excluded = value.excludeFromIndexes ??
+            value?.arrayValue?.values
+                ?.firstWhere((e) => e.excludeFromIndexes != null, orElse: () => null)
+                ?.excludeFromIndexes;
+        return excluded ?? false;
+      }));
     }
   }
 
   @override
-  String toString() => {
-        "key": key,
-        "properties": _properties,
-        "unindexed": _unindexedProperties
-      }.toString();
+  String toString() => {"key": key, "properties": _properties, "unindexed": _unindexedProperties}.toString();
 
   /// Creates a `package:googleapis` object representation of this entity.
   @override
@@ -109,8 +105,7 @@ class Entity implements ApiRepresentation<ds.Entity> {
     ..key = key.toApiObject()
     ..properties = new Map.fromIterable(
       _properties.keys,
-      value: (name) => toValue(_properties[name],
-          excludeFromIndexes: _unindexedProperties.contains(name)),
+      value: (name) => toValue(_properties[name], excludeFromIndexes: _unindexedProperties.contains(name)),
     );
 
   /// Returns the kind of this entity, or `null` if this entity has a `null` key
