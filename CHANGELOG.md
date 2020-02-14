@@ -1,3 +1,7 @@
+## 0.4.1
+
+* Added `isEmpty`/`isNotEmpty` properties to `MutationBatch`
+
 ## 0.4.0+2
 
 * Added an example, fixed linter warnings

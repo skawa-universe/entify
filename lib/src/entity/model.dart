@@ -9,6 +9,8 @@ import "../datastore/entity.dart";
 import "../datastore/key.dart";
 import "../datastore/query.dart";
 
+typedef T ModelFactory<T>();
+
 /// Maps entity model objects of a certain type to [Entity] objects and back.
 ///
 /// The type parameter [T] must be the same class that is passed to the constructor
@@ -16,17 +18,17 @@ import "../datastore/query.dart";
 class EntityBridge<T> {
   /// Constructs or returns a cached [EntityBridge] object based on
   /// the type parameter [T].
-  factory EntityBridge() {
-    return new EntityBridge<T>.fromClass(T);
+  factory EntityBridge({ModelFactory<T> modelFactory}) {
+    return new EntityBridge<T>.fromClass(T, modelFactory: modelFactory);
   }
 
   /// Constructs an entity mapper object based on [type].
   ///
   /// Uses an internal cache of [EntityBridge] objects.
-  factory EntityBridge.fromClass(Type type) {
+  factory EntityBridge.fromClass(Type type, {ModelFactory<T> modelFactory}) {
     EntityBridge<T> result = _cachedBridges[type];
     if (result != null) return result;
-    result = new EntityBridge.uniqueFromClass(type);
+    result = new EntityBridge.uniqueFromClass(type, modelFactory: modelFactory);
     _cachedBridges[type] = result;
     return result;
   }
@@ -35,18 +37,20 @@ class EntityBridge<T> {
   ///
   /// Normally there's no need to use this constructor, the cached object
   /// should do every time.
-  factory EntityBridge.uniqueFromClass(Type type) {
+  factory EntityBridge.uniqueFromClass(Type type, {ModelFactory<T> modelFactory}) {
     EntityMetadataBuilder b = new EntityMetadataBuilder.fromClass(type);
     return new EntityBridge._(
         b.descriptor,
         b.kind,
         b.key,
         new Map.unmodifiable(b.propertyMetadata),
-        new List.unmodifiable(b.versionFields));
+        new List.unmodifiable(b.versionFields),
+        modelFactory: modelFactory,
+    );
   }
 
   EntityBridge._(this.descriptor, this.kind, this._key, this._propertyMetadata,
-      this._versionFields);
+      this._versionFields, {this.modelFactory});
 
   Key createKey({String name, int id, Key parent}) =>
       new Key(kind, name: name, id: id, parent: parent);
@@ -87,7 +91,8 @@ class EntityBridge<T> {
 
   /// Sets the properties of an entity model object based on an [Entity] object and
   /// returns the entity model object.
-  T fromEntity(Entity source, T target) {
+  T fromEntity(Entity source, [T target]) {
+    if (target == null) target = modelFactory();
     InstanceMirror im = reflect(target);
     Key key = source.key;
     PropertyAccessor keyAccessor = _key.accessor;
@@ -137,6 +142,7 @@ class EntityBridge<T> {
   final EntityPropertyBridge _key;
   final Map<String, EntityPropertyBridge> _propertyMetadata;
   final List<EntityPropertyBridge> _versionFields;
+  final ModelFactory<T> modelFactory;
 
   static final Map<Type, dynamic> _cachedBridges = {};
 }
