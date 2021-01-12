@@ -2,6 +2,7 @@ import "dart:mirrors";
 import "dart:typed_data";
 
 import "errors.dart";
+import "model.dart";
 
 /// Provides access to a model property.
 ///
@@ -22,10 +23,67 @@ abstract class PropertyAccessor {
 
   /// Returns the property value of the mirrored [object].
   dynamic getValue(InstanceMirror object);
+
+  TypeMirror get _typeMirror;
+}
+
+final TypeMirror valueHolderMirror = reflectType(ValueHolder);
+
+TypeMirror _valueHolderType(TypeMirror type) {
+  if (type is ClassMirror) {
+    if (type.qualifiedName == valueHolderMirror.qualifiedName) {
+      return type.typeArguments.first;
+    } else {
+      TypeMirror fromSupertype = _valueHolderType(type.superclass);
+      if (fromSupertype != null) return fromSupertype;
+      for (ClassMirror superinterface in type.superinterfaces) {
+        TypeMirror fromSuperinterface = _valueHolderType(superinterface);
+        if (fromSuperinterface != null) return fromSuperinterface;
+      }
+      return null;
+    }
+  } else {
+    return null;
+  }
+}
+
+class _ValueHolderAdapter implements PropertyAccessor {
+  static PropertyAccessor adapt(PropertyAccessor nested) {
+    if (nested._typeMirror.isSubtypeOf(valueHolderMirror)) {
+      return _ValueHolderAdapter(nested);
+    } else {
+      return nested;
+    }
+  }
+
+  _ValueHolderAdapter(this.nested) : _typeMirror = _valueHolderType(nested._typeMirror);
+
+  @override
+  String get name => nested.name;
+
+  @override
+  final TypeMirror _typeMirror;
+
+  @override
+  bool acceptsType(Type type) => reflectType(type).isAssignableTo(_typeMirror);
+
+  @override
+  dynamic getValue(InstanceMirror object) => (nested.getValue(object) as ValueHolder)?.value;
+
+  @override
+  void setValue(InstanceMirror object, Object value) {
+    ValueHolder nestedHolder = nested.getValue(object);
+    if (nestedHolder != null) nestedHolder.value = value;
+  }
+
+  final PropertyAccessor nested;
 }
 
 /// Provides unified access to object fields.
 class FieldPropertyAccessor implements PropertyAccessor {
+  static PropertyAccessor create(VariableMirror variable) =>
+      _ValueHolderAdapter.adapt(FieldPropertyAccessor(variable));
+
   /// Constructs the accessor based on a [VariableMirror] instance.
   FieldPropertyAccessor(this._variable)
       : _setValueAdapter = _createValueAdapter(_variable.type);
@@ -35,7 +93,7 @@ class FieldPropertyAccessor implements PropertyAccessor {
 
   @override
   bool acceptsType(Type type) =>
-      reflectType(type).isAssignableTo(_variable.type);
+      reflectType(type).isAssignableTo(_typeMirror);
 
   @override
   void setValue(InstanceMirror object, dynamic value) {
@@ -47,12 +105,19 @@ class FieldPropertyAccessor implements PropertyAccessor {
   dynamic getValue(InstanceMirror object) =>
       object.getField(_variable.simpleName).reflectee;
 
+  @override
+  TypeMirror get _typeMirror => _variable.type;
+
   final VariableMirror _variable;
   final _ValueAdapter _setValueAdapter;
 }
 
 /// Provides unified access to getter-setter pairs on objects.
 class MethodPropertyAccessor implements PropertyAccessor {
+  static PropertyAccessor create(MethodMirror getterOrSetter,
+      [MethodMirror setterOrGetter]) =>
+      _ValueHolderAdapter.adapt(MethodPropertyAccessor(getterOrSetter, setterOrGetter));
+
   /// Constructs the accessor based on a getter and a setter pair.
   ///
   /// The parameters can be provided in any order the constructor detects

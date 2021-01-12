@@ -1,3 +1,7 @@
+## 0.4.2
+
+* Introduced `ValueHolder<T>`
+
 ## 0.4.1
 
 * Added `isEmpty`/`isNotEmpty` properties to `MutationBatch`

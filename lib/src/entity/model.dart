@@ -11,6 +11,19 @@ import "../datastore/query.dart";
 
 typedef T ModelFactory<T>();
 
+/// When the type of a field on the model implements this interface
+/// the object will be used to set values, and not the field itself.
+/// Can be used to intelligently encode/decode and cache values.
+/// These fields should never be `null` (they will be ignored if
+/// they are), it's recommended to implement these as a `final` field
+/// with an inline initializer.
+abstract class ValueHolder<T> {
+  /// Returns the Datastore-friendly value
+  T get value;
+  /// Sets the Datastore-friendly value on this holder
+  set value(T newValue);
+}
+
 /// Maps entity model objects of a certain type to [Entity] objects and back.
 ///
 /// The type parameter [T] must be the same class that is passed to the constructor

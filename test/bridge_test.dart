@@ -72,6 +72,35 @@ class NoSkipMissing {
   bool gamma = false;
 }
 
+class LowerCaseValue extends ValueHolder<String> {
+  @override
+  String get value => _value?.toLowerCase();
+
+  @override
+  set value(String newValue) => _value = newValue;
+
+  String _value;
+}
+
+class EvenInt extends ValueHolder<int> {
+  @override
+  int get value => _value == null ? null : _value & ~1;
+
+  @override
+  set value(int newValue) => _value = newValue;
+
+  int _value;
+}
+
+@entityModel
+class ModelWithLowerCaseValue {
+  @primaryKey
+  final EvenInt key = EvenInt();
+
+  @persistent
+  final LowerCaseValue s = LowerCaseValue();
+}
+
 void main() {
   test("Basic serialization", () {
     const List<int> bytesAsList = const <int>[0, 50, 100, 150, 200, 250];
@@ -149,5 +178,21 @@ void main() {
     expect(nsm.alpha, 7);
     expect(nsm.beta, isNull);
     expect(nsm.gamma, false);
+  });
+
+  test("ValueHolder", () {
+    ModelWithLowerCaseValue model = ModelWithLowerCaseValue();
+    EntityBridge<ModelWithLowerCaseValue> bridge = EntityBridge(modelFactory: () => ModelWithLowerCaseValue());
+    model.s.value = "Foo";
+    model.key.value = 11;
+    Entity e = bridge.toEntity(model);
+    expect(e.key.id, 10);
+    expect(e.isIndexed("s"), isTrue);
+    expect(e["s"], "foo");
+    e.key = bridge.createKey(id: 15);
+    e.setValue("s", "Bar", indexed: true);
+    model = bridge.fromEntity(e);
+    expect(model.s.value, "bar");
+    expect(model.key.value, 14);
   });
 }
