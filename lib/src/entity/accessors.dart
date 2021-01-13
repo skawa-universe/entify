@@ -152,6 +152,7 @@ class MethodPropertyAccessor implements PropertyAccessor {
   dynamic getValue(InstanceMirror object) =>
       object.getField(_getter.simpleName).reflectee;
 
+  @override
   TypeMirror get _typeMirror =>
       _setter != null ? _setter.parameters[0].type : _getter.returnType;
 
