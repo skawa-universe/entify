@@ -49,7 +49,8 @@ TypeMirror _valueHolderType(TypeMirror type) {
 
 class _ValueHolderAdapter implements PropertyAccessor {
   static PropertyAccessor adapt(PropertyAccessor nested) {
-    if (nested._typeMirror.isSubtypeOf(valueHolderMirror)) {
+    TypeMirror nestedType = nested._typeMirror;
+    if (nestedType is ClassMirror && nestedType.isSubtypeOf(valueHolderMirror)) {
       return _ValueHolderAdapter(nested);
     } else {
       return nested;

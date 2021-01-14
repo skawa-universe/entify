@@ -26,6 +26,9 @@ class TestClass {
   @Persistent(name: "renamed", indexed: false)
   String address;
 
+  @persistent
+  dynamic get dynamicValue => (address.length & 1) > 0 ? true : "yes";
+
   @unindexed
   String get unbox => box.value;
 
@@ -120,9 +123,13 @@ void main() {
     expect(e.indexed["name"], "foo",
         reason: "Indexed property exists and indexed");
     expect(e.unindexed["renamed"], "Nowhere");
+    expect(e.indexed["dynamicValue"], true);
     expect(e.unindexed["unbox"], "bar");
     expect(e.unindexed["bytes"], equals(bytesAsList));
     expect(e.indexed["generatedField"], equals("FOO"));
+
+    tc.address = "Even";
+    expect(tcb.toEntity(tc).indexed["dynamicValue"], "yes");
   });
 
   test("Basic deserialization", () {
