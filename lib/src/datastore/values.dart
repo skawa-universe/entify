@@ -4,6 +4,8 @@ import "dart:typed_data";
 import "package:googleapis/datastore/v1.dart" as ds;
 
 import "errors.dart";
+import "entity.dart";
+import "geo.dart";
 import "key.dart";
 
 class IndexedOverride<T> {
@@ -36,6 +38,11 @@ ds.Value toValue(Object obj, {bool excludeFromIndexes}) {
   if (obj is double) return result..doubleValue = obj;
   if (obj is bool) return result..booleanValue = obj;
   if (obj is String) return result..stringValue = obj;
+  if (obj is DateTime) return result..timestampValue = obj.toIso8601String();
+  if (obj is Entity) return result..entityValue = obj.toApiObject();
+  if (obj is ds.Entity) return result..entityValue = obj;
+  if (obj is GeoPoint) return result..geoPointValue = obj.toApiObject();
+  if (obj is ds.LatLng) return result..geoPointValue = obj;
   if (obj is TypedData || obj is ByteBuffer) {
     Uint8List bytes;
     if (obj is ByteBuffer) {
@@ -79,6 +86,9 @@ Object fromValue(ds.Value value) {
   if (value.arrayValue != null)
     return value.arrayValue.values?.map(fromValue)?.toList();
   if (value.keyValue != null) return new Key.fromApiObject(value.keyValue);
+  if (value.timestampValue != null) return DateTime.parse(value.timestampValue);
+  if (value.entityValue != null) return Entity.fromApiObject(value.entityValue);
+  if (value.geoPointValue != null) return GeoPoint.fromApiObject(value.geoPointValue);
 
   // Nulls are represented in surprising ways
   Map json = value.toJson();
