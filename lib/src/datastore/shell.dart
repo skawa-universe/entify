@@ -76,7 +76,7 @@ class DatastoreShell {
         .then((ds.LookupResponse resp) async {
       List<ds.EntityResult> found = resp.found ?? [];
       while (resp.deferred?.isNotEmpty ?? false) {
-        if (resp.found?.isEmpty ?? true) {
+        if ((resp.found?.isEmpty ?? true) && (resp.missing?.isEmpty ?? true)) {
           throw new DatastoreShellError(
               "Entity lookup deferred, but not a single one more returned: ${resp.deferred}");
         }

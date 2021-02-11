@@ -69,7 +69,7 @@ class EntityMetadataBuilder {
       if (declaration is VariableMirror) {
         VariableMirror vm = declaration;
         if (vm.isStatic) continue;
-        accessor = new FieldPropertyAccessor(vm);
+        accessor = FieldPropertyAccessor.create(vm);
       }
       if (declaration is MethodMirror) {
         MethodMirror mm = declaration;
@@ -77,7 +77,7 @@ class EntityMetadataBuilder {
         String setterName = "${MirrorSystem.getName(mm.simpleName)}=";
         MethodMirror setter = declarations[new Symbol(setterName)];
         // setter may be null, but that's OK
-        accessor = new MethodPropertyAccessor(mm, setter);
+        accessor = MethodPropertyAccessor.create(mm, setter);
         if (setter != null) {
           // create a shallow copy of the list first
           metadata = metadata.toList();

@@ -8,6 +8,7 @@ export "src/datastore/api_mapping.dart";
 export "src/datastore/entity.dart";
 export "src/datastore/errors.dart";
 export "src/datastore/key.dart";
+export "src/datastore/geo.dart";
 export "src/datastore/mutations.dart";
 export "src/datastore/options.dart";
 export "src/datastore/query.dart";
