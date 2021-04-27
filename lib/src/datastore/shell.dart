@@ -240,9 +240,12 @@ class QueryResultBatch implements QueryResult<Entity> {
 
 /// Contains methods for fetching and returning entities from a [Query].
 class PreparedQuery {
+  PreparedQuery.fromProtocol(this.shell, this.query, {String namespace})
+      : namespace = namespace ?? Namespace.currentName;
+
   PreparedQuery._(this.shell, Query query, String namespace)
-      : this.query = query.toApiObject(),
-        this.namespace = namespace ?? Namespace.currentName;
+      : query = query.toApiObject(),
+        namespace = namespace ?? Namespace.currentName;
 
   /// Runs the query and returns the resulting batch.
   Future<QueryResultBatch> runQuery() => runRawQuery().then(
