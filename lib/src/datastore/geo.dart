@@ -1,6 +1,5 @@
 import "package:googleapis/datastore/v1.dart" as ds;
 
-import "errors.dart";
 import "api_mapping.dart";
 import "util.dart";
 
