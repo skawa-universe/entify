@@ -239,7 +239,7 @@ class QueryResultBatch implements QueryResult<Entity> {
 
 /// Contains methods for fetching and returning entities from a [Query].
 class PreparedQuery {
-  PreparedQuery._fromProtocol(this.shell, this.query);
+  PreparedQuery.fromProtocol(this.shell, this.query);
 
   PreparedQuery._(this.shell, Query query) : this.query = query.toApiObject();
 
