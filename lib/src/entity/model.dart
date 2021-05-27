@@ -56,7 +56,10 @@ class EntityBridge<T> {
         b.descriptor,
         b.kind,
         b.key,
-        new Map.unmodifiable(b.propertyMetadata),
+        new Map.unmodifiable({
+          for (MapEntry<String, EntityPropertyBridge> entry in b.propertyMetadata.entries)
+            entry.value.name: entry.value
+        }),
         new List.unmodifiable(b.versionFields),
         modelFactory: modelFactory,
     );
