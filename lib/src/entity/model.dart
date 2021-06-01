@@ -153,7 +153,7 @@ class EntityBridge<T> {
   bool isWriteOnlyProperty(String entityPropertyName) {
     EntityPropertyBridge bridge = _propertyMetadata[entityPropertyName];
     if (bridge == null) throw PropertyNotFoundException(entityPropertyName);
-    return bridge.accessor.hasSetter;
+    return !bridge.accessor.hasSetter;
   }
 
   @override
