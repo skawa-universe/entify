@@ -1,3 +1,5 @@
+import "dart:typed_data";
+
 import "package:googleapis/datastore/v1.dart" as ds;
 
 import "api_mapping.dart";
@@ -159,7 +161,7 @@ class Entity implements ApiRepresentation<ds.Entity> {
       for (String key in other._properties.keys) {
         dynamic val = other._properties[key];
         // make a copy if it's a collection
-        if (val is Iterable) val = val.toList();
+        if (val is Iterable && val is! TypedData) val = val.toList();
         _properties[key] = val;
       }
     } else {
