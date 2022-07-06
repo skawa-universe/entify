@@ -56,7 +56,10 @@ class EntityBridge<T> {
         b.descriptor,
         b.kind,
         b.key,
-        new Map.unmodifiable(b.propertyMetadata),
+        new Map.unmodifiable({
+          for (MapEntry<String, EntityPropertyBridge> entry in b.propertyMetadata.entries)
+            entry.value.name: entry.value
+        }),
         new List.unmodifiable(b.versionFields),
         modelFactory: modelFactory,
     );
@@ -75,7 +78,7 @@ class EntityBridge<T> {
     dynamic key = _key.accessor.getValue(im);
     if (key is Key) {
       if (key.kind != kind) {
-        throw new EntityModelError("Key has a kind \"${key.kind}\", but "
+        throw new EntityModelException("Key has a kind \"${key.kind}\", but "
             "the model entity is \"${kind}\"");
       }
       result.key = key;
@@ -84,7 +87,7 @@ class EntityBridge<T> {
     } else if (key is String || key == null) {
       result.key = new Key(kind, name: key);
     } else {
-      throw new EntityModelError("Unrecognized key type: ${key.runtimeType}");
+      throw new EntityModelException("Unrecognized key type: ${key.runtimeType}");
     }
 
     for (EntityPropertyBridge prop in _propertyMetadata.values) {
@@ -92,7 +95,7 @@ class EntityBridge<T> {
       // flatten/duplicate iterables so there's no strange changes in lists
       if (value is! TypedData && value is Iterable) value = value.toList();
       if (value is Key && !value.isComplete)
-        throw new EntityModelError(
+        throw new EntityModelException(
             "Value of ${prop.name} is an incomplete key: $value!");
       final bool indexed = prop.metadata.indexed &&
           (!prop.metadata.indexedIfNonNull || value != null);
@@ -144,6 +147,15 @@ class EntityBridge<T> {
 
   bool keyKindMatches(Key key) => key?.kind == kind;
 
+  /// Returns `true` if the property is only written to entities, but never read from
+  /// entities (there is no setter).
+  /// The parameter is the name of the property on the entity.
+  bool isWriteOnlyProperty(String entityPropertyName) {
+    EntityPropertyBridge bridge = _propertyMetadata[entityPropertyName];
+    if (bridge == null) throw PropertyNotFoundException(entityPropertyName);
+    return !bridge.accessor.hasSetter;
+  }
+
   @override
   String toString() =>
       "EntityBridge($kind, $_key, ${_propertyMetadata.values.join(", ")})";
@@ -153,6 +165,7 @@ class EntityBridge<T> {
   /// The kind this [EntityBridge] instance represents.
   final String kind;
   final EntityPropertyBridge _key;
+  /// Entity field name to property bridge
   final Map<String, EntityPropertyBridge> _propertyMetadata;
   final List<EntityPropertyBridge> _versionFields;
   final ModelFactory<T> modelFactory;

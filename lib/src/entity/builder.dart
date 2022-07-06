@@ -43,7 +43,7 @@ class EntityMetadataBuilder {
       }
     }
     if (desc == null) {
-      throw new EntityModelError(
+      throw new EntityModelException(
           "Type is not entity model: ${leaf.reflectedType}");
     }
     kind = desc.kind ?? MirrorSystem.getName(leaf.simpleName);
@@ -55,7 +55,7 @@ class EntityMetadataBuilder {
     }
 
     if (key == null)
-      throw new EntityModelError(
+      throw new EntityModelException(
           "Type does not define a key: ${leaf.reflectedType}");
   }
 

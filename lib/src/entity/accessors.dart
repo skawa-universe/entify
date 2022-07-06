@@ -24,6 +24,12 @@ abstract class PropertyAccessor {
   /// Returns the property value of the mirrored [object].
   dynamic getValue(InstanceMirror object);
 
+  /// The property supports reading
+  bool get hasGetter;
+
+  /// The property supports writing
+  bool get hasSetter;
+
   TypeMirror get _typeMirror;
 }
 
@@ -77,6 +83,12 @@ class _ValueHolderAdapter implements PropertyAccessor {
     if (nestedHolder != null) nestedHolder.value = value;
   }
 
+  @override
+  final bool hasGetter = true;
+
+  @override
+  final bool hasSetter = true;
+
   final PropertyAccessor nested;
 }
 
@@ -107,6 +119,12 @@ class FieldPropertyAccessor implements PropertyAccessor {
       object.getField(_variable.simpleName).reflectee;
 
   @override
+  final bool hasGetter = true;
+
+  @override
+  final bool hasSetter = true;
+
+  @override
   TypeMirror get _typeMirror => _variable.type;
 
   final VariableMirror _variable;
@@ -132,7 +150,7 @@ class MethodPropertyAccessor implements PropertyAccessor {
                 ?.parameters
                 ?.first
                 ?.type) {
-    if (!_getter.isGetter) throw new EntityModelError("No getter was given");
+    if (!_getter.isGetter) throw new EntityModelException("No getter was given");
   }
 
   @override
@@ -152,6 +170,12 @@ class MethodPropertyAccessor implements PropertyAccessor {
   @override
   dynamic getValue(InstanceMirror object) =>
       object.getField(_getter.simpleName).reflectee;
+
+  @override
+  bool get hasGetter => _getter != null;
+
+  @override
+  bool get hasSetter => _setter != null;
 
   @override
   TypeMirror get _typeMirror =>
