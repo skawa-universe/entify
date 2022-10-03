@@ -1,3 +1,5 @@
+import "dart:convert" show json;
+
 import "package:googleapis/datastore/v1.dart" as ds;
 
 import "key.dart";
@@ -25,6 +27,8 @@ class WrappedServerError extends DatastoreShellError {
 
   @override
   String toString() => "${super.toString()}/${originalError.toString()}";
+
+  String get jsonString => json.encode(originalError.jsonResponse);
 
   final ds.DetailedApiRequestError originalError;
 }
